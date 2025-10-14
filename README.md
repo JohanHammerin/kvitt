@@ -17,5 +17,9 @@
 - Skapade en databas via MongoDB Cloud.
 
 **2025-10-12**
-- Kopplat ihop projekt med databasen med hjälp av en ```DB_CONNECTION_STRING```.
-  - Fick lite problem då IntelliJ inte kunde hitta användarnamn eller lösenord då det är gömt i en ```.env``` fil.
+- Kopplat ihop projekt med databasen med hjälp av en ``DB_CONNECTION_STRING``.
+  - Fick lite problem då IntelliJ inte kunde hitta användarnamn eller lösenord då det är gömt i en ``.env`` fil.
+
+**2025-10-14**
+- Skapade strukturen för projektet med packages.
+- Skapade 2 entitetsklasser ``User`` och `Event`.
