@@ -23,3 +23,12 @@
 **2025-10-14**
 - Skapade strukturen för projektet med packages.
 - Skapade 2 entitetsklasser ``User`` och `Event`.
+
+**2025-10-16**
+- Skapat upp nedanstående filer för `KvittUser` & `Event`
+  - Repository
+  - Service
+  - Controller
+  - ObjectMapper
+  - DTO
+  - createKvittUser & createEvent metoder med tillhörande endpoints.
