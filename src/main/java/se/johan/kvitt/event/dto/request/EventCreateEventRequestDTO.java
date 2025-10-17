@@ -5,7 +5,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 
-public record EventCreationRequestDTO(
+public record EventCreateEventRequestDTO(
         @Size(max = 255, message = "Titeln får inte vara längre än 255 tecken")
         @NotBlank(message = "Titeln får inte vara tomt")
         String title,

@@ -6,10 +6,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestMapping;
 import reactor.core.publisher.Mono;
-import se.johan.kvitt.event.dto.request.EventCreationRequestDTO;
+import se.johan.kvitt.event.dto.request.EventCreateEventRequestDTO;
+import se.johan.kvitt.event.dto.response.EventGetAllEventsByIdDTO;
 import se.johan.kvitt.event.objectMapper.EventMapper;
 import se.johan.kvitt.event.model.Event;
 import se.johan.kvitt.event.repository.EventRepository;
+
+import java.util.List;
 
 @Service
 @RequestMapping("/event")
@@ -24,10 +27,16 @@ public class EventService {
         this.eventMapper = eventMapper;
     }
 
-    public Mono<Event> createEvent(EventCreationRequestDTO eventCreationRequestDTO) {
-
+    public Mono<Event> createEvent(EventCreateEventRequestDTO eventCreateEventRequestDTO) {
         logger.info("New Message was created & saved");
+        return eventRepository.save(eventMapper.toEntity(eventCreateEventRequestDTO));
+    }
 
-        return eventRepository.save(eventMapper.toEntity(eventCreationRequestDTO));
+    public Mono<List<EventGetAllEventsByIdDTO>> getAllEventsById(String kvittUserId) {
+        logger.info("{} requested all events", kvittUserId);
+
+        return eventRepository.findAllByKvittUserId(kvittUserId)
+                .map(eventMapper::toGetAllEventsByIdDTO)
+                .collectList(); // samlar alla till en lista (Mono<List<...>>)
     }
 }

@@ -5,9 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
-import se.johan.kvitt.event.dto.request.EventCreationRequestDTO;
-import se.johan.kvitt.event.model.Event;
-import se.johan.kvitt.kvittUser.dto.request.KvittUserCreationRequestDTO;
+import se.johan.kvitt.kvittUser.dto.request.KvittUserCreateKvittUserRequestDTO;
 import se.johan.kvitt.kvittUser.model.KvittUser;
 import se.johan.kvitt.kvittUser.objectMapper.KvittUserMapper;
 import se.johan.kvitt.kvittUser.repository.KvittUserRepository;
@@ -24,11 +22,11 @@ public class KvittUserService {
         this.kvittUserMapper = kvittUserMapper;
     }
 
-    public Mono<KvittUser> createKvittUser(KvittUserCreationRequestDTO kvittUserCreationRequestDTO) {
+    public Mono<KvittUser> createKvittUser(KvittUserCreateKvittUserRequestDTO kvittUserCreateKvittUserRequestDTO) {
 
         logger.info("New KvittUser was created & saved");
 
-        return kvittUserRepository.save(kvittUserMapper.toEntity(kvittUserCreationRequestDTO));
+        return kvittUserRepository.save(kvittUserMapper.toEntity(kvittUserCreateKvittUserRequestDTO));
     }
 
 }

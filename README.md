@@ -32,3 +32,7 @@
   - ObjectMapper
   - DTO
   - createKvittUser & createEvent metoder med tillhörande endpoints.
+- Hade lite problem med ``application.properties`` då den hängde med i min git push. Men efter ett ändrat lösenord för min ``Connection String`` till MongoDB så kunde jag lösa det.
+
+**2025-10-17**
+
