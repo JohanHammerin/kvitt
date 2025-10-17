@@ -35,4 +35,5 @@
 - Hade lite problem med ``application.properties`` då den hängde med i min git push. Men efter ett ändrat lösenord för min ``Connection String`` till MongoDB så kunde jag lösa det.
 
 **2025-10-17**
-
+- Skapat en ```getAllEvents``` endpoint som är kopplat till ``KvittUserId``
+- Hade extrema problem med detta då den vägrade att låta mig komma åt endpoints markerat med @GetMapping. För att lösa detta så stängde jag ner alla connections mot PORT:8080 och började om.
