@@ -37,3 +37,6 @@
 **2025-10-17**
 - Skapat en ```getAllEvents``` endpoint som är kopplat till ``KvittUserId``
 - Hade extrema problem med detta då den vägrade att låta mig komma åt endpoints markerat med @GetMapping. För att lösa detta så stängde jag ner alla connections mot PORT:8080 och började om.
+
+**2025-10-19**
+- Fixade logger
