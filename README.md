@@ -40,3 +40,7 @@
 
 **2025-10-19**
 - Fixade logger
+
+**2025-10-21**
+- Fixade ``getTotalIncome`` endpoint.
+  - Hade några extrema problem med denna då den efter mycket strul fick reda på att spring inte läste av Controller-filen. Eftersom att det blivit en ändring från ``boolean`` till ``BigDecimal`` vägrade spring läsa av det. Den valde då att bygga projektet från en tidigare build fil som inte innehöll de nya ändringara.
