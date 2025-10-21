@@ -905,3 +905,5 @@ Original Stack Trace:
 2025-10-21T20:05:24.357+02:00 DEBUG 66827 --- [kvitt] [nioEventLoopGroup-3-7] .s.w.r.r.m.a.ResponseEntityResultHandler : [388355fa-7] 0..1 [java.math.BigDecimal]
 2025-10-21T20:05:24.357+02:00 DEBUG 66827 --- [kvitt] [nioEventLoopGroup-3-7] org.springframework.web.HttpLogging      : [388355fa-7] Encoding [64]
 2025-10-21T20:05:24.358+02:00 DEBUG 66827 --- [kvitt] [nioEventLoopGroup-3-7] o.s.w.s.adapter.HttpWebHandlerAdapter    : [388355fa-7] Completed 200 OK
+2025-10-21T20:06:58.725+02:00  INFO 66827 --- [kvitt] [SpringApplicationShutdownHook] o.s.b.w.embedded.netty.GracefulShutdown  : Commencing graceful shutdown. Waiting for active requests to complete
+2025-10-21T20:06:58.726+02:00  INFO 66827 --- [kvitt] [netty-shutdown] o.s.b.w.embedded.netty.GracefulShutdown  : Graceful shutdown complete
