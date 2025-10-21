@@ -1,5 +1,6 @@
 package se.johan.kvitt.event.controller;
 
+import jakarta.annotation.PostConstruct;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -7,20 +8,31 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 import se.johan.kvitt.event.dto.request.EventCreateEventRequestDTO;
-import se.johan.kvitt.event.dto.response.EventGetAllEventsByIdDTO;
+import se.johan.kvitt.event.dto.response.EventGetAllEventsByIdResponseDTO;
 import se.johan.kvitt.event.model.Event;
 import se.johan.kvitt.event.service.EventService;
+import org.springframework.web.bind.annotation.RequestParam;
 
+
+import java.math.BigDecimal;
 import java.util.List;
 
-@RequestMapping("/api/v1/event")
+@RequestMapping("api/v1/event")
 @RestController
 public class EventController {
+
+
+    @PostConstruct
+    public void __loadedCheck() {
+        System.out.println(">>> THIS EVENTCONTROLLER WAS LOADED <<<");
+    }
+
 
     private final EventService eventService;
 
     @Autowired
     public EventController(EventService eventService) {
+        System.out.println(">>> EVENT CONTROLLER LOADED <<<");
         this.eventService = eventService;
     }
 
@@ -34,7 +46,8 @@ public class EventController {
     }
 
     @GetMapping("/getAllEvents")
-    public Mono<ResponseEntity<List<EventGetAllEventsByIdDTO>>> getAllEventsById(@RequestParam String kvittUserId) {
+    public Mono<ResponseEntity<List<EventGetAllEventsByIdResponseDTO>>> getAllEventsById(@RequestParam String kvittUserId) {
+        System.out.println(">>> ENTERED getTotalIncome MAPPING <<<");
         return eventService.getAllEventsById(kvittUserId)
                 .map(events -> ResponseEntity
                         .status(HttpStatus.OK)
@@ -43,14 +56,26 @@ public class EventController {
                 );
     }
 
-    @GetMapping("/test")
-    public String test() {
-        return "ok";
+
+
+    @GetMapping("/getTotalIncome")
+    public Mono<ResponseEntity<BigDecimal>> getTotalIncome(@RequestParam String kvittUserId) {
+        System.out.println(">>> ENTERED getTotalIncome MAPPING <<<");
+        return eventService.getTotalIncome(kvittUserId)
+                .map(total -> ResponseEntity
+                        .status(HttpStatus.OK)
+                        .body(total)
+                );
     }
 
-    @GetMapping("/ping")
-    public Mono<String> ping() {
-        return Mono.just("pong");
+
+    @GetMapping("/test")
+    public String test() {
+        return "test";
+    }
+    @GetMapping("/income-test")
+    public String incomeTest() {
+        return "works";
     }
 
 
