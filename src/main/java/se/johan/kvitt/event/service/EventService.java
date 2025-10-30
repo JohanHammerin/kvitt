@@ -41,9 +41,25 @@ public class EventService {
 
     public Mono<BigDecimal> getTotalIncome(String kvittUserId) {
         return eventRepository.findAllEventsByKvittUserId(kvittUserId)
+                .filter(event -> !event.expense())
                 .map(event -> event.amount())                             // plockar amount
                 .reduce(BigDecimal.ZERO, (sum, next) -> sum.add(next)); // summerar
     }
+
+    public Mono<BigDecimal> getTotalExpense(String kvittUserId) {
+        return eventRepository.findAllEventsByKvittUserId(kvittUserId)
+                .filter(event -> event.expense())
+                .map(event -> event.amount())                             // plockar amount
+                .reduce(BigDecimal.ZERO, (sum, next) -> sum.add(next)); // summerar
+    }
+
+    public Mono<BigDecimal> getFinancials(String kvittUserId) {
+        return Mono.zip(
+                getTotalIncome(kvittUserId),
+                getTotalExpense(kvittUserId)
+        ).map(tuple -> tuple.getT1().subtract(tuple.getT2())); // income - expense
+    }
+
 
 
 }

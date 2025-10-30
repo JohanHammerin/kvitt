@@ -51,10 +51,19 @@ public class EventController {
     @GetMapping("/getTotalIncome")
     public Mono<ResponseEntity<BigDecimal>> getTotalIncome(@RequestParam String kvittUserId) {
         return eventService.getTotalIncome(kvittUserId)
-                .map(total -> ResponseEntity
-                        .status(HttpStatus.OK)
-                        .body(total)
-                );
+                .map(ResponseEntity::ok);
+    }
+
+    @GetMapping("/getTotalExpense")
+    public Mono<ResponseEntity<BigDecimal>> getTotalExpense(@RequestParam String kvittUserId) {
+        return eventService.getTotalExpense(kvittUserId)
+                .map(ResponseEntity::ok);
+    }
+
+    @GetMapping("/getFinancials")
+    public Mono<ResponseEntity<BigDecimal>> getFinancials(@RequestParam String kvittUserId) {
+        return eventService.getFinancials(kvittUserId)
+                .map(ResponseEntity::ok);
     }
 
 
