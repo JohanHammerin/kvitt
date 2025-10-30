@@ -10,8 +10,6 @@ public record KvittUser(
         @Id
         String id,
         String username,
-        String password,
-        double totalIncome,
-        double totalExpenses
+        String password
 ) {
 }

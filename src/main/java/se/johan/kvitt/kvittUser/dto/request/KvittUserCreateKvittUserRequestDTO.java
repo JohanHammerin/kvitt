@@ -9,9 +9,7 @@ public record KvittUserCreateKvittUserRequestDTO(
         String username,
         @Size(max = 50, message = "Lösenordet får inte vara längre än 255 tecken")
         @NotBlank(message = "Lösenordet får inte vara tomt")
-        String password,
-        double totalIncome,
-        double totalExpense
+        String password
 
         )
         {}

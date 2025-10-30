@@ -1,6 +1,5 @@
 package se.johan.kvitt.event.controller;
 
-import jakarta.annotation.PostConstruct;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -22,17 +21,10 @@ import java.util.List;
 public class EventController {
 
 
-    @PostConstruct
-    public void __loadedCheck() {
-        System.out.println(">>> THIS EVENTCONTROLLER WAS LOADED <<<");
-    }
-
-
     private final EventService eventService;
 
     @Autowired
     public EventController(EventService eventService) {
-        System.out.println(">>> EVENT CONTROLLER LOADED <<<");
         this.eventService = eventService;
     }
 
@@ -47,7 +39,6 @@ public class EventController {
 
     @GetMapping("/getAllEvents")
     public Mono<ResponseEntity<List<EventGetAllEventsByIdResponseDTO>>> getAllEventsById(@RequestParam String kvittUserId) {
-        System.out.println(">>> ENTERED getTotalIncome MAPPING <<<");
         return eventService.getAllEventsById(kvittUserId)
                 .map(events -> ResponseEntity
                         .status(HttpStatus.OK)
@@ -57,10 +48,8 @@ public class EventController {
     }
 
 
-
     @GetMapping("/getTotalIncome")
     public Mono<ResponseEntity<BigDecimal>> getTotalIncome(@RequestParam String kvittUserId) {
-        System.out.println(">>> ENTERED getTotalIncome MAPPING <<<");
         return eventService.getTotalIncome(kvittUserId)
                 .map(total -> ResponseEntity
                         .status(HttpStatus.OK)
@@ -72,10 +61,6 @@ public class EventController {
     @GetMapping("/test")
     public String test() {
         return "test";
-    }
-    @GetMapping("/income-test")
-    public String incomeTest() {
-        return "works";
     }
 
 

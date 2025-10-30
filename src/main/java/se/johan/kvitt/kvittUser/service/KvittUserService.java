@@ -3,6 +3,7 @@ package se.johan.kvitt.kvittUser.service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 import se.johan.kvitt.kvittUser.dto.request.KvittUserCreateKvittUserRequestDTO;
@@ -24,8 +25,8 @@ public class KvittUserService {
 
     public Mono<KvittUser> createKvittUser(KvittUserCreateKvittUserRequestDTO kvittUserCreateKvittUserRequestDTO) {
 
-        logger.info("New KvittUser was created & saved");
 
+        logger.info("New KvittUser was created & saved");
         return kvittUserRepository.save(kvittUserMapper.toEntity(kvittUserCreateKvittUserRequestDTO));
     }
 
