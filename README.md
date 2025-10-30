@@ -43,4 +43,11 @@
 
 **2025-10-21**
 - Fixade ``getTotalIncome`` endpoint.
-  - Hade några extrema problem med denna då den efter mycket strul fick reda på att spring inte läste av Controller-filen. Eftersom att det blivit en ändring från ``boolean`` till ``BigDecimal`` vägrade spring läsa av det. Den valde då att bygga projektet från en tidigare build fil som inte innehöll de nya ändringara.
+  - Hade några extrema problem med denna då den efter mycket strul fick reda på att spring inte läste av Controller-filen. Eftersom att det blivit en ändring från ``boolean`` till ``BigDecimal`` vägrade spring läsa av det. Den valde då att bygga projektet från en tidigare build fil som inte innehöll de nya ändringarna.
+
+
+**2025-10-30**
+- Skapade en `config` fil med en `PasswordEncoder`.
+- Skapade `getExpense` och `getFinancials`.
+- Raderade onödiga variabler för `kvittUser` entiteten.
+- Det gick rätt smärtfritt och stötte inte på några alltför stora problem.
