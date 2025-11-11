@@ -26,34 +26,39 @@ public class EventService {
         this.eventMapper = eventMapper;
     }
 
-    public Mono<Event> createEvent(EventCreateEventRequestDTO eventCreateEventRequestDTO) {
+    public Event createEvent(EventCreateEventRequestDTO eventCreateEventRequestDTO) {
         logger.info("New Event was created & saved");
         return eventRepository.save(eventMapper.toEntity(eventCreateEventRequestDTO));
     }
 
-    public Mono<List<EventGetAllEventsByIdResponseDTO>> getAllEventsById(String kvittUserId) {
+    public List<EventGetAllEventsByIdResponseDTO> getAllEventsById(String kvittUserId) {
         logger.info("{} requested all events", kvittUserId);
 
         return eventRepository.findAllEventsByKvittUserId(kvittUserId)
-                .map(event -> eventMapper.toGetAllEventsByIdDTO(event))
-                .collectList();
+                .stream()
+                .map(eventMapper::toGetAllEventsByIdDTO)
+                .toList();
     }
 
-    public Mono<BigDecimal> getTotalIncome(String kvittUserId) {
+
+    public BigDecimal getTotalIncome(String kvittUserId) {
         return eventRepository.findAllEventsByKvittUserId(kvittUserId)
-                .filter(event -> !event.expense())
-                .map(event -> event.amount())                             // plockar amount
-                .reduce(BigDecimal.ZERO, (sum, next) -> sum.add(next)); // summerar
+                .stream()
+                .filter(e -> !e.expense())
+                .map(Event::amount)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
-    public Mono<BigDecimal> getTotalExpense(String kvittUserId) {
+
+    public BigDecimal getTotalExpense(String kvittUserId) {
         return eventRepository.findAllEventsByKvittUserId(kvittUserId)
-                .filter(event -> event.expense())
-                .map(event -> event.amount())                             // plockar amount
-                .reduce(BigDecimal.ZERO, (sum, next) -> sum.add(next)); // summerar
+                .stream()
+                .filter(Event::expense)
+                .map(Event::amount)
+                .reduce(BigDecimal.ZERO, BigDecimal::add); // summerar
     }
 
-    public Mono<BigDecimal> getFinancials(String kvittUserId) {
+    public BigDecimal getFinancials(String kvittUserId) {
         return Mono.zip(
                 getTotalIncome(kvittUserId),
                 getTotalExpense(kvittUserId)

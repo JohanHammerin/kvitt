@@ -8,7 +8,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import reactor.core.publisher.Mono;
 import se.johan.kvitt.kvittUser.dto.request.KvittUserCreateKvittUserRequestDTO;
 import se.johan.kvitt.kvittUser.model.KvittUser;
 import se.johan.kvitt.kvittUser.service.KvittUserService;
@@ -24,11 +23,10 @@ public class KvittUserController {
     }
 
     @PostMapping("/create")
-    public Mono<ResponseEntity<KvittUser>> createKvittUser(@Valid @RequestBody KvittUserCreateKvittUserRequestDTO kvittUserCreateKvittUserRequestDTO) {
-        return kvittUserService.createKvittUser(kvittUserCreateKvittUserRequestDTO)
-                .map(kvittUser -> ResponseEntity
-                        .status(HttpStatus.CREATED)
-                        .body(kvittUser)
-                );
+    public ResponseEntity<KvittUser> createKvittUser(
+            @Valid @RequestBody KvittUserCreateKvittUserRequestDTO kvittUserCreateKvittUserRequestDTO
+    ) {
+        KvittUser created = kvittUserService.createKvittUser(kvittUserCreateKvittUserRequestDTO);
+        return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 }

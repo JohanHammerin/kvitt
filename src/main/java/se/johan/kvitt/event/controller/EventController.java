@@ -5,7 +5,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import reactor.core.publisher.Mono;
 import se.johan.kvitt.event.dto.request.EventCreateEventRequestDTO;
 import se.johan.kvitt.event.dto.response.EventGetAllEventsByIdResponseDTO;
 import se.johan.kvitt.event.model.Event;
@@ -29,41 +28,36 @@ public class EventController {
     }
 
     @PostMapping("/create")
-    public Mono<ResponseEntity<Event>> createEvent(@Valid @RequestBody EventCreateEventRequestDTO eventCreateEventRequestDTO) {
-        return eventService.createEvent(eventCreateEventRequestDTO)
-                .map(event -> ResponseEntity
-                        .status(HttpStatus.CREATED)
-                        .body(event)
-                );
+    public ResponseEntity<Event> createEvent(@Valid @RequestBody EventCreateEventRequestDTO eventCreateEventRequestDTO) {
+        Event created = eventService.createEvent(eventCreateEventRequestDTO);
+        return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
     @GetMapping("/getAllEvents")
-    public Mono<ResponseEntity<List<EventGetAllEventsByIdResponseDTO>>> getAllEventsById(@RequestParam String kvittUserId) {
-        return eventService.getAllEventsById(kvittUserId)
-                .map(events -> ResponseEntity
-                        .status(HttpStatus.OK)
-                        .body(events)
-
-                );
+    public ResponseEntity<List<EventGetAllEventsByIdResponseDTO>> getAllEventsById(@RequestParam String kvittUserId) {
+        List<EventGetAllEventsByIdResponseDTO> events = eventService.getAllEventsById(kvittUserId);
+        return ResponseEntity.ok(events);
     }
+
 
 
     @GetMapping("/getTotalIncome")
-    public Mono<ResponseEntity<BigDecimal>> getTotalIncome(@RequestParam String kvittUserId) {
-        return eventService.getTotalIncome(kvittUserId)
-                .map(ResponseEntity::ok);
+    public ResponseEntity<BigDecimal> getTotalIncome(@RequestParam String kvittUserId) {
+        BigDecimal totalIncome = eventService.getTotalIncome(kvittUserId);
+        return ResponseEntity.ok(totalIncome);
     }
 
+
     @GetMapping("/getTotalExpense")
-    public Mono<ResponseEntity<BigDecimal>> getTotalExpense(@RequestParam String kvittUserId) {
-        return eventService.getTotalExpense(kvittUserId)
-                .map(ResponseEntity::ok);
+    public ResponseEntity<BigDecimal> getTotalExpense(@RequestParam String kvittUserId) {
+        BigDecimal totalExpense = eventService.getTotalExpense(kvittUserId);
+        return ResponseEntity.ok(totalExpense);
     }
 
     @GetMapping("/getFinancials")
-    public Mono<ResponseEntity<BigDecimal>> getFinancials(@RequestParam String kvittUserId) {
-        return eventService.getFinancials(kvittUserId)
-                .map(ResponseEntity::ok);
+    public ResponseEntity<BigDecimal> getFinancials(@RequestParam String kvittUserId) {
+        BigDecimal financials = eventService.getFinancials(kvittUserId);
+        return ResponseEntity.ok(financials);
     }
 
 
@@ -71,6 +65,4 @@ public class EventController {
     public String test() {
         return "test";
     }
-
-
 }

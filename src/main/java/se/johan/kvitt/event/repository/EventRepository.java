@@ -1,13 +1,14 @@
 package se.johan.kvitt.event.repository;
 
-import org.springframework.data.mongodb.repository.ReactiveMongoRepository;
+import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
-import reactor.core.publisher.Flux;
 import se.johan.kvitt.event.model.Event;
+
+import java.util.List;
 
 
 @Repository
-public interface EventRepository extends ReactiveMongoRepository<Event, String> {
-    Flux<Event> findAllEventsByKvittUserId(String kvittUserId);
+public interface EventRepository extends MongoRepository<Event, String> {
+    List<Event> findAllEventsByKvittUserId(String kvittUserId);
 }
 

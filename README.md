@@ -51,3 +51,7 @@
 - Skapade `getExpense` och `getFinancials`.
 - Raderade onödiga variabler för `kvittUser` entiteten.
 - Det gick rätt smärtfritt och stötte inte på några alltför stora problem.
+
+**2025-11-11**
+- Börjat med att implementera JWT till projektet.
+- Bytta från WebFlux till Web MVC då det inte fanns en anledning att jobb asynkront.
