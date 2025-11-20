@@ -4,7 +4,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import reactor.core.publisher.Mono;
 import se.johan.kvitt.event.dto.request.EventCreateEventRequestDTO;
 import se.johan.kvitt.event.dto.response.EventGetAllEventsByIdResponseDTO;
 import se.johan.kvitt.event.objectMapper.EventMapper;
@@ -59,11 +58,13 @@ public class EventService {
     }
 
     public BigDecimal getFinancials(String kvittUserId) {
-        return Mono.zip(
-                getTotalIncome(kvittUserId),
-                getTotalExpense(kvittUserId)
-        ).map(tuple -> tuple.getT1().subtract(tuple.getT2())); // income - expense
+        BigDecimal totalIncome = getTotalIncome(kvittUserId);
+        BigDecimal totalExpense = getTotalExpense(kvittUserId);
+
+        return totalIncome.subtract(totalExpense);
     }
+
+
 
 
 

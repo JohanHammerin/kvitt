@@ -1,9 +1,11 @@
-package se.johan.kvitt.jwt;
+package se.johan.kvitt.kvittUser.jwt;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.constraints.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +16,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
+import se.johan.kvitt.auth.UserRole;
+import se.johan.kvitt.kvittUser.model.KvittUserDetailsService;
 
 import java.io.IOException;
 import java.util.List;
@@ -23,74 +27,65 @@ import java.util.Set;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private static final Logger logger = LoggerFactory.getLogger(JwtAuthenticationFilter.class);
     private final JwtUtils jwtUtils;
-    private final CustomUserDetailsService customUserDetailsService;
+    private final KvittUserDetailsService kvittUserDetailsService;
 
-    @Autowired
-    public JwtAuthenticationFilter(JwtUtils jwtUtils, CustomUserDetailsService customUserDetailsService) {
+    //@Autowired
+    public JwtAuthenticationFilter(JwtUtils jwtUtils, KvittUserDetailsService kvittUserDetailsService) {
         this.jwtUtils = jwtUtils;
-        this.customUserDetailsService = customUserDetailsService;
+        this.kvittUserDetailsService = kvittUserDetailsService;
     }
 
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        String path = request.getRequestURI();
+        boolean shouldSkip = path.equals("/api/v1/kvittUser/create") ||
+                path.equals("/api/v1/kvittUser/login");
 
+        System.out.println("🔍 JWT Filter - Path: '" + path + "' | Should skip: " + shouldSkip);
+
+        return shouldSkip;
+    }
 
     @Override
     protected void doFilterInternal(
-            HttpServletRequest request,
-            HttpServletResponse response,
+            @NotNull HttpServletRequest request,
+            @NotNull HttpServletResponse response,
             FilterChain filterChain)
             throws ServletException, IOException {
-
 
         logger.debug("---------JwtAuthenticationFilter START---------");
 
         String token = extractJwtFromCookie(request);
         if (token == null) {
-            token = extractJwtFromRequest(request); // Fallback om det inte finns någon cookie Läskigt smart
+            token = extractJwtFromRequest(request);
         }
 
-        if (token == null) {
-            logger.debug("No JWT token found in this request");
-            filterChain.doFilter(request, response);
-            return;
-        }
-
-        logger.debug("JWT token found: {}", token);
-
-        if (jwtUtils.validateJwtToken(token)) {
+        if (token != null && jwtUtils.validateJwtToken(token)) {
             String username = jwtUtils.getUsernameFromJwtToken(token);
             Set<UserRole> userRoles = jwtUtils.getRolesFromJwtToken(token);
 
-            if (username == null && SecurityContextHolder.getContext().getAuthentication() == null) {
-                // Build Spring authorities from roles
+            if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                 List<SimpleGrantedAuthority> authorities = userRoles.stream()
-                        .flatMap(role -> role.getUserAuthorities().stream())// Role + permissions
+                        .flatMap(role -> role.getUserAuthorities().stream())
                         .toList();
-
 
                 UsernamePasswordAuthenticationToken authentication =
                         new UsernamePasswordAuthenticationToken(username, null, authorities);
-
-
                 authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-
                 SecurityContextHolder.getContext().setAuthentication(authentication);
+
                 logger.debug("Authenticated user: '{}' with roles {}", username, userRoles);
-
-
-            } else {
-                logger.warn("Invalid JWT token");
             }
-
-            filterChain.doFilter(request, response);
-            logger.debug("---------JwtAuthenticationFilter END---------");
-
-
-
-
+        } else {
+            logger.debug("No valid JWT token found");
         }
 
-
+        // Kör alltid filterkedjan
+        filterChain.doFilter(request, response);
+        logger.debug("---------JwtAuthenticationFilter END---------");
     }
+
+
 
     private String extractJwtFromCookie(HttpServletRequest request) {
         if (request.getCookies() == null) return null;
@@ -112,4 +107,3 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
 
 }
-

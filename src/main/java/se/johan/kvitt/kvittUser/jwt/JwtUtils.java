@@ -1,4 +1,4 @@
-package se.johan.kvitt.jwt;
+package se.johan.kvitt.kvittUser.jwt;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -6,8 +6,8 @@ import io.jsonwebtoken.security.Keys;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
-import se.johan.spring_security.user.CustomUser;
-import se.johan.spring_security.user.authority.UserRole;
+import se.johan.kvitt.auth.UserRole;
+import se.johan.kvitt.kvittUser.model.KvittUser;
 
 import javax.crypto.SecretKey;
 import java.util.Base64;
@@ -30,24 +30,19 @@ public class JwtUtils {
     private final int jwtExpirationMs = (int) TimeUnit.HOURS.toMillis(1);
 
 
-    public String generateJwtToken(CustomUser customUser) {
-        logger.debug("Generating JWT for user: {} wit roles: {}", customUser.getUsername(), customUser.getUserRoles());
+    public String generateJwtToken(KvittUser kvittUser) {
 
-        List<String> roles = customUser.getUserRoles().stream().map(
-                userRole -> userRole.getRoleName()
-        ).toList();
+        List<String> roles = kvittUser.getRoles().stream()
+                .map(UserRole::getRoleName)
+                .toList();
 
-
-
-        String token = Jwts.builder()
-                .subject(customUser.getUsername()) // sub
-                .claim("authorities", roles) // claim: authorities finns inte
-                .issuedAt(new Date())
-                .expiration(new Date(System.currentTimeMillis() + jwtExpirationMs))
+        String token = Jwts.builder().subject(kvittUser.getUsername())
+                .claim("authorities", roles).issuedAt(new Date()).expiration(new Date(System.currentTimeMillis() + jwtExpirationMs))
                 .signWith(key)
                 .compact();
 
-        logger.info("JWT generated successfully for user {}", customUser.getUsername());
+
+        logger.info("JWT generated successfully for user {}", kvittUser.getUsername());
         return token;
     }
 

@@ -1,4 +1,4 @@
-package se.johan.kvitt.kvittUser.dto.request;
+package se.johan.kvitt.kvittUser.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;

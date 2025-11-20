@@ -3,8 +3,10 @@ package se.johan.kvitt.kvittUser.objectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
-import se.johan.kvitt.kvittUser.dto.request.KvittUserCreateKvittUserRequestDTO;
+import se.johan.kvitt.kvittUser.dto.KvittUserCreateKvittUserRequestDTO;
 import se.johan.kvitt.kvittUser.model.KvittUser;
+
+import java.util.HashSet;
 
 @Component
 public class KvittUserMapper {
@@ -20,8 +22,14 @@ public class KvittUserMapper {
         return new KvittUser(
                 null,
                 kvittUserCreateKvittUserRequestDTO.username(),
-                passwordEncoder.encode(kvittUserCreateKvittUserRequestDTO.password())
+                passwordEncoder.encode(kvittUserCreateKvittUserRequestDTO.password()),
+                true,   // accountNonExpired
+                true,   // accountNonLocked
+                true,   // credentialsNonExpired
+                true,   // enabled
+                new HashSet<>() // roles
         );
+
     }
 
 }
