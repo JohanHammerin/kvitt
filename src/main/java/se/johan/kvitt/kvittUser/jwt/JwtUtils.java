@@ -27,7 +27,7 @@ public class JwtUtils {
             Base64.getDecoder().decode(base64EncodedSecretKey);
     private final SecretKey key = Keys.hmacShaKeyFor(keyBytes); // Skapar en kryptografisk nyckel, som skyddar oss från John Pork
     // JWT expire in 1 hour
-    private final int jwtExpirationMs = (int) TimeUnit.HOURS.toMillis(1);
+    private final int jwtExpirationMs = (int) TimeUnit.HOURS.toMillis(24);
 
 
     public String generateJwtToken(KvittUser kvittUser) {

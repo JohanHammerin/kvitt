@@ -10,7 +10,10 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import se.johan.kvitt.auth.UserRole;
+import se.johan.kvitt.auth.UserRoleName;
 import se.johan.kvitt.kvittUser.jwt.JwtAuthenticationFilter;
+
 
 @Configuration
 @EnableWebSecurity
@@ -36,7 +39,7 @@ public class AppSecurityConfig {
         httpSecurity
                 .csrf(csrfConfigurer -> csrfConfigurer.disable())   // Disable for DEBUGGING PURPOSES
                 .authorizeHttpRequests( auth -> auth
-                        .requestMatchers("/api/v1/kvittUser/create", "/api/v1/kvittUser/login").permitAll()  // Allow localhost:8080/
+                        .requestMatchers("/api/v1/kvittUser/create", "/api/v1/kvittUser/login").permitAll()
                         .anyRequest().authenticated()
                 )
 

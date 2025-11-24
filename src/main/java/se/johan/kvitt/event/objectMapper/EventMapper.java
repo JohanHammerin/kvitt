@@ -17,16 +17,19 @@ public class EventMapper {
                 eventCreateEventRequestDTO.amount(),
                 eventCreateEventRequestDTO.expense(),
                 LocalDateTime.now(),
+                false,
                 eventCreateEventRequestDTO.kvittUserId()
         );
     }
 
     public EventGetAllEventsByIdResponseDTO toGetAllEventsByIdDTO(Event event) {
         return new EventGetAllEventsByIdResponseDTO(
-                event.title(),
-                event.amount(),
-                event.expense(),
-                event.dateTime()
+                event.getTitle(),
+                event.getAmount(),
+                event.isExpense(),
+                event.getDateTime(),
+                event.isPaid()
+
         );
     }
 

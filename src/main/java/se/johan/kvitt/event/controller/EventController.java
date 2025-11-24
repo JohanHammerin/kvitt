@@ -60,6 +60,26 @@ public class EventController {
         return ResponseEntity.ok(financials);
     }
 
+    @GetMapping("/getPaidEvents")
+    public ResponseEntity<List<Event>> getPaidEvents(@RequestParam String kvittUserId) {
+        List<Event> paidEvents = eventService.paidEvents(kvittUserId);
+        return ResponseEntity.ok(paidEvents);
+    }
+
+    @GetMapping("/getUnPaidEvents")
+    public ResponseEntity<List<Event>> getUnPaidEvents(@RequestParam String kvittUserId) {
+        List<Event> unPaidEvents = eventService.unPaidEvents(kvittUserId);
+        return ResponseEntity.ok(unPaidEvents);
+    }
+
+
+    @PostMapping("/calculateUnPaidEvents")
+    public ResponseEntity<String> calculateUnPaidEvents(@RequestParam String kvittUserId) {
+        eventService.calculateUnPaidEvents(kvittUserId);
+        return ResponseEntity.ok().body("Kvitt skanning utförd");
+    }
+
+
 
     @GetMapping("/test")
     public String test() {

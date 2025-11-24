@@ -15,6 +15,7 @@ public record EventCreateEventRequestDTO(
         BigDecimal amount,
         @NotNull
         boolean expense,
+        boolean paid,
         @Size(max = 255, message = "ID får inte vara längre än 255 tecken")
         @NotBlank(message = "ID får inte vara tomt")
         String kvittUserId

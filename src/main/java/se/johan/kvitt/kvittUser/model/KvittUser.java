@@ -1,10 +1,8 @@
 package se.johan.kvitt.kvittUser.model;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
-import org.springframework.data.mongodb.core.mapping.Field;
 import se.johan.kvitt.auth.UserRole;
 
-import java.util.HashSet;
 import java.util.Set;
 
 @Document(collection = "kvittCollection")
@@ -15,10 +13,10 @@ public class KvittUser {
     private String username;
     private String password;
 
-    private boolean accountNonExpired = true;
-    private boolean accountNonLocked = true;
-    private boolean credentialsNonExpired = true;
-    private boolean enabled = true;
+    private boolean accountNonExpired;
+    private boolean accountNonLocked;
+    private boolean credentialsNonExpired;
+    private boolean enabled;
     private Set<UserRole> roles;
 
 
@@ -35,10 +33,6 @@ public class KvittUser {
 
     public String getId() {
         return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
     }
 
     public String getUsername() {

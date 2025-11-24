@@ -3,10 +3,12 @@ package se.johan.kvitt.kvittUser.objectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
+import se.johan.kvitt.auth.UserRole;
 import se.johan.kvitt.kvittUser.dto.KvittUserCreateKvittUserRequestDTO;
 import se.johan.kvitt.kvittUser.model.KvittUser;
 
 import java.util.HashSet;
+import java.util.Set;
 
 @Component
 public class KvittUserMapper {
@@ -19,6 +21,11 @@ public class KvittUserMapper {
     }
 
     public KvittUser toEntity(KvittUserCreateKvittUserRequestDTO kvittUserCreateKvittUserRequestDTO) {
+
+        // Skapa en Set med USER-rollen
+        Set<UserRole> roles = new HashSet<>();
+        roles.add(UserRole.USER);
+
         return new KvittUser(
                 null,
                 kvittUserCreateKvittUserRequestDTO.username(),
@@ -27,7 +34,7 @@ public class KvittUserMapper {
                 true,   // accountNonLocked
                 true,   // credentialsNonExpired
                 true,   // enabled
-                new HashSet<>() // roles
+                roles // roles
         );
 
     }

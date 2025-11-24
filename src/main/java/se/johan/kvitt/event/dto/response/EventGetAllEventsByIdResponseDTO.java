@@ -7,6 +7,8 @@ public record EventGetAllEventsByIdResponseDTO(
         String title,
         BigDecimal amount,
         boolean expense,
-        LocalDateTime dateTime
+        LocalDateTime dateTime,
+        boolean paid
+
 ) {
 }
