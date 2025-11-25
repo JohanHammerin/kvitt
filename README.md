@@ -55,3 +55,7 @@
 **2025-11-11**
 - Börjat med att implementera JWT till projektet.
 - Bytta från WebFlux till Web MVC då det inte fanns en anledning att jobb asynkront.
+
+**2025-11-24**
+- Har under en längre tid krigat på med JWT och roller. Men igår kunde jag stolt säga att ``JWT`` samt roller är nu en del av ``Kvitt``.
+- 
