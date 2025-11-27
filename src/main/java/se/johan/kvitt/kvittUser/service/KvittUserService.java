@@ -1,6 +1,5 @@
 package se.johan.kvitt.kvittUser.service;
 
-import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,7 +7,6 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestBody;
 import se.johan.kvitt.kvittUser.dto.KvittUserCreateKvittUserRequestDTO;
 import se.johan.kvitt.kvittUser.dto.KvittUserLoginRequestDTO;
 import se.johan.kvitt.kvittUser.jwt.JwtUtils;
@@ -43,7 +41,7 @@ public class KvittUserService {
                 new UsernamePasswordAuthenticationToken(dto.username(), dto.password())
         );
 
-        KvittUser kvittUser = kvittUserRepository.findUserByUsername(dto.username())
+        KvittUser kvittUser = kvittUserRepository.findByUsername(dto.username())
                 .orElseThrow(); // borde inte hända
 
         return jwtUtils.generateJwtToken(kvittUser);

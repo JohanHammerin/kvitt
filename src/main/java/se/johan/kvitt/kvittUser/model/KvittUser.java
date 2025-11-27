@@ -5,7 +5,7 @@ import se.johan.kvitt.auth.UserRole;
 
 import java.util.Set;
 
-@Document(collection = "kvittCollection")
+@Document(collection = "users")
 public class KvittUser {
 
     @Id
@@ -19,6 +19,9 @@ public class KvittUser {
     private boolean enabled;
     private Set<UserRole> roles;
 
+
+    public KvittUser() {
+    }
 
     public KvittUser(String id, String username, String password, boolean accountNonExpired, boolean accountNonLocked, boolean credentialsNonExpired, boolean enabled, Set<UserRole> roles) {
         this.id = id;

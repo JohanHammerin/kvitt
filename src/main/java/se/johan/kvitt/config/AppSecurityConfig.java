@@ -37,9 +37,10 @@ public class AppSecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
         httpSecurity
+                .cors(cors -> cors.configure(httpSecurity)) // 👈 LÄGG TILL DENNA RAD!
                 .csrf(csrfConfigurer -> csrfConfigurer.disable())   // Disable for DEBUGGING PURPOSES
                 .authorizeHttpRequests( auth -> auth
-                        .requestMatchers("/api/v1/kvittUser/create", "/api/v1/kvittUser/login").permitAll()
+                        .requestMatchers("/api/v1/kvittUser/create", "/api/v1/kvittUser/login", "/api/v1/event/test").permitAll()
                         .anyRequest().authenticated()
                 )
 
