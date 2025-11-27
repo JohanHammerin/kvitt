@@ -31,6 +31,9 @@ public class EventService {
 
     public Event createEvent(EventCreateEventRequestDTO eventCreateEventRequestDTO) {
         logger.info("New Event was created & saved");
+        if(!eventCreateEventRequestDTO.expense()) {
+            calculateUnPaidEvents(eventCreateEventRequestDTO.kvittUserId());
+        }
         return eventRepository.save(eventMapper.toEntity(eventCreateEventRequestDTO));
     }
 
@@ -85,8 +88,7 @@ public class EventService {
                 .toList();
     }
 
-    @Transactional
-    public void calculateUnPaidEvents(String kvittUserId) {
+    private void calculateUnPaidEvents(String kvittUserId) {
         BigDecimal availableIncome = getTotalIncome(kvittUserId);
 
         // Hämta och sortera efter äldsta först

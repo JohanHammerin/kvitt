@@ -73,12 +73,6 @@ public class EventController {
     }
 
 
-    @PostMapping("/calculateUnPaidEvents")
-    public ResponseEntity<String> calculateUnPaidEvents(@RequestParam String kvittUserId) {
-        eventService.calculateUnPaidEvents(kvittUserId);
-        return ResponseEntity.ok().body("Kvitt skanning utförd");
-    }
-
 
 
     @GetMapping("/test")
