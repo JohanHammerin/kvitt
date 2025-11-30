@@ -7,6 +7,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import se.johan.kvitt.event.dto.request.EventCreateEventRequestDTO;
 import se.johan.kvitt.event.dto.response.EventGetAllEventsByUsernameResponseDTO;
+// 👈 NY IMPORT: Lägg till din KvittStatus DTO
+import se.johan.kvitt.event.dto.response.KvittStatusResponseDTO;
 import se.johan.kvitt.event.model.Event;
 import se.johan.kvitt.event.service.EventService;
 import se.johan.kvitt.kvittUser.repository.KvittUserRepository;
@@ -126,6 +128,34 @@ public class EventController {
             response.put("financials", financials);
             response.put("timestamp", LocalDateTime.now());
             response.put("message", "Financials retrieved successfully");
+
+            return ResponseEntity.ok(response);
+        } catch (RuntimeException e) {
+            if (e.getMessage().contains("User not found")) {
+                Map<String, Object> errorResponse = new HashMap<>();
+                errorResponse.put("error", "User not found");
+                errorResponse.put("message", e.getMessage());
+                errorResponse.put("timestamp", LocalDateTime.now());
+                errorResponse.put("status", HttpStatus.NOT_FOUND.value());
+
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+            }
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", "Internal server error"));
+        }
+    }
+
+    // --- NY SLUTPUNKT FÖR KVITT STATUS ---
+    @GetMapping("/getKvittStatus")
+    public ResponseEntity<Map<String, Object>> getKvittStatus(@RequestParam String username) {
+        try {
+            KvittStatusResponseDTO status = eventService.getKvittStatus(username);
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("username", username);
+            response.put("expensesBack", status.expensesBack());
+            response.put("lastKvittDate", status.lastKvittDate());
+            response.put("timestamp", LocalDateTime.now());
+            response.put("message", status.expensesBack() == 0 ? "User is Kvitt (paid up)" : "User is back on expenses");
 
             return ResponseEntity.ok(response);
         } catch (RuntimeException e) {

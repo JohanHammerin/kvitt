@@ -22,8 +22,10 @@ public class EventMapper {
         );
     }
 
+    // Uppdatera toGetAllEventsByIdDTO metoden
     public EventGetAllEventsByUsernameResponseDTO toGetAllEventsByIdDTO(Event event) {
         return new EventGetAllEventsByUsernameResponseDTO(
+                event.getId(), // <-- Lägg till detta
                 event.getTitle(),
                 event.getAmount(),
                 event.isExpense(),
