@@ -17,7 +17,6 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class EventService {
@@ -34,17 +33,23 @@ public class EventService {
     }
 
     public Event createEvent(EventCreateEventRequestDTO eventCreateEventRequestDTO) {
-        logger.info("New Event was created & saved");
-        if(!eventCreateEventRequestDTO.expense()) {
-            calculateUnPaidEvents(eventCreateEventRequestDTO.username());
+        // 1. SPARA FÖRST
+        // Vi måste spara eventet i databasen först så att getTotalIncome ser den nya summan.
+        Event savedEvent = eventRepository.save(eventMapper.toEntity(eventCreateEventRequestDTO));
+        logger.info("New Event was created & saved: {}", savedEvent.getTitle());
+
+        // 2. BERÄKNA SEN
+        // Om det var en inkomst (inte en utgift), kolla om vi kan betala gamla skulder.
+        if (!savedEvent.isExpense()) {
+            calculateUnPaidEvents(savedEvent.getUsername());
         }
-        return eventRepository.save(eventMapper.toEntity(eventCreateEventRequestDTO));
+
+        return savedEvent;
     }
 
     public List<EventGetAllEventsByUsernameResponseDTO> getAllEventsByUsername(String username) {
         logger.info("{} requested all events", username);
 
-        // Kontrollera först om användaren finns
         if (!userExists(username)) {
             logger.warn("User not found: {}", username);
             throw new RuntimeException("User not found: " + username);
@@ -64,7 +69,6 @@ public class EventService {
     }
 
     public BigDecimal getTotalIncome(String username) {
-        // Kontrollera först om användaren finns
         if (!userExists(username)) {
             throw new RuntimeException("User not found: " + username);
         }
@@ -77,7 +81,6 @@ public class EventService {
     }
 
     public BigDecimal getTotalExpense(String username) {
-        // Kontrollera först om användaren finns
         if (!userExists(username)) {
             throw new RuntimeException("User not found: " + username);
         }
@@ -90,7 +93,6 @@ public class EventService {
     }
 
     public BigDecimal getFinancials(String username) {
-        // Kontrollera först om användaren finns
         if (!userExists(username)) {
             throw new RuntimeException("User not found: " + username);
         }
@@ -102,7 +104,6 @@ public class EventService {
     }
 
     public List<Event> paidEvents(String username) {
-        // Kontrollera först om användaren finns
         if (!userExists(username)) {
             throw new RuntimeException("User not found: " + username);
         }
@@ -115,7 +116,6 @@ public class EventService {
     }
 
     public List<Event> unPaidEvents(String username) {
-        // Kontrollera först om användaren finns
         if (!userExists(username)) {
             throw new RuntimeException("User not found: " + username);
         }
@@ -127,103 +127,106 @@ public class EventService {
                 .toList();
     }
 
+    /**
+     * Hjälpmetod för att beräkna summan av alla utgifter som redan är betalda.
+     * Detta behövs för att veta hur mycket av inkomsten som är "låst".
+     */
+    private BigDecimal getTotalPaidExpensesAmount(String username) {
+        return eventRepository.findByUsername(username)
+                .stream()
+                .filter(Event::isExpense)
+                .filter(Event::isPaid)
+                .map(Event::getAmount)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
     private void calculateUnPaidEvents(String username) {
-        // Kontrollera först om användaren finns
         if (!userExists(username)) {
             throw new RuntimeException("User not found: " + username);
         }
 
-        // Hämta ALLA inkomster för att ha en budget
-        BigDecimal availableIncome = getTotalIncome(username);
+        // 1. Hämta TOTAL inkomst (Inkluderar den nyss insatta inkomsten)
+        BigDecimal totalIncome = getTotalIncome(username);
 
-        // Hämta nu OCH filtrera i databasen:
-        // Hämta Utgifter (Expense=true) som inte är Betalda (Paid=false), sorterade ÄLDSTA FÖRST!
+        // 2. Hämta summan av utgifter som REDAN är betalda
+        BigDecimal alreadyPaidAmount = getTotalPaidExpensesAmount(username);
+
+        // 3. Beräkna tillgängliga medel (Inkomst - Redan betalt)
+        BigDecimal availableFunds = totalIncome.subtract(alreadyPaidAmount);
+
+        // 4. Hämta obetalda utgifter, äldsta först
         List<Event> unpaidExpenses = eventRepository.findByUsernameAndExpenseTrueAndPaidFalseOrderByDateTimeAsc(username);
 
-        logger.info("Starting calculateUnPaidEvents. Found {} DB-filtered unpaid expenses. Available income: {}",
-                unpaidExpenses.size(), availableIncome);
+        logger.info("Starting calculation. Total Income: {}, Already Paid: {}, Available Funds: {}",
+                totalIncome, alreadyPaidAmount, availableFunds);
 
         List<Event> updatedEvents = new ArrayList<>();
-        int expensesPaidCount = 0; // Spåra antalet betalda utgifter
+        int expensesPaidCount = 0;
 
         for (Event expense : unpaidExpenses) {
-            // Vi använder >= 0 för att tillåta saldot att bli exakt 0 efter betalning.
-            if (availableIncome.compareTo(expense.getAmount()) >= 0) {
+            // Kontrollera om vi har råd att betala denna utgift med våra tillgängliga medel
+            if (availableFunds.compareTo(expense.getAmount()) >= 0) {
 
                 expense.setPaid(true);
                 updatedEvents.add(expense);
-                availableIncome = availableIncome.subtract(expense.getAmount());
+
+                // Minska potten med tillgängliga pengar
+                availableFunds = availableFunds.subtract(expense.getAmount());
                 expensesPaidCount++;
 
-                logger.info("✅ MARKED AS PAID (#{}): '{}' (ID: {}, Amount: {}). Remaining income: {}",
+                logger.info("MARKED AS PAID (#{}): '{}' (ID: {}, Amount: {}). Remaining funds: {}",
                         expensesPaidCount,
                         expense.getTitle(),
                         expense.getId(),
                         expense.getAmount(),
-                        availableIncome);
+                        availableFunds);
 
             } else {
-                logger.warn("⚠️ INSUFFICIENT FUNDS for event '{}' (ID: {}). Needed: {}, Available: {}",
-                        expense.getTitle(), expense.getId(), expense.getAmount(), availableIncome);
-                break;
+                logger.warn("INSUFFICIENT FUNDS for event '{}' (ID: {}). Needed: {}, Available: {}",
+                        expense.getTitle(), expense.getId(), expense.getAmount(), availableFunds);
+                break; // Sluta loopen om pengarna är slut
             }
         }
 
         if (!updatedEvents.isEmpty()) {
-            // Detta borde nu spara de 2 eventen korrekt om availableIncome var 200 kr
             eventRepository.saveAll(updatedEvents);
-            logger.info("🎉 SUCCESS: Marked {} events as paid (oldest first) and SAVED to database.",
+            logger.info("SUCCESS: Marked {} events as paid (oldest first) and SAVED to database.",
                     updatedEvents.size());
         } else {
-            logger.info("No events could be paid for user {}. Available income: {}",
-                    username, availableIncome);
+            logger.info("No new events could be paid for user {}. Available funds: {}",
+                    username, availableFunds);
         }
     }
 
-    // --- KORRIGERAD METOD FÖR KVITT STATUS (Lösningen som fungerar) ---
     public KvittStatusResponseDTO getKvittStatus(String username) {
-        // Kontrollera om användaren finns
         if (!userExists(username)) {
             throw new RuntimeException("User not found: " + username);
         }
 
-        // 1. Hämta ALLA utgifter, sorterade från NYASTE till ÄLDSTA (DESCENDING)
+        // Hämta alla utgifter
         List<Event> allExpenses = eventRepository.findByUsername(username).stream()
                 .filter(Event::isExpense)
-                .sorted(Comparator.comparing(Event::getDateTime).reversed()) // Nyaste först
                 .toList();
 
-        BigDecimal tempFunds = getTotalIncome(username);
-        int coveredCount = 0;
-        LocalDate lastKvittDate = LocalDate.now();
+        // 1. RÄKNA: Hur många är INTE betalda?
+        // Detta fixar felet så att den visar 2 istället för 4.
+        long expensesBack = allExpenses.stream()
+                .filter(event -> !event.isPaid())
+                .count();
 
-        // 2. Iterera genom de NYASTE utgifterna och simulera betalning för att hitta brytpunkten
-        for (Event expense : allExpenses) {
-            if (tempFunds.compareTo(expense.getAmount()) >= 0) {
-                tempFunds = tempFunds.subtract(expense.getAmount());
-                coveredCount++;
-                // Spara datumet för den äldsta utgiften som täcktes i denna simulering
-                lastKvittDate = expense.getDateTime().toLocalDate();
-            } else {
-                // BRYT: Fonderna har tagit slut. Alla återstående utgifter kan inte täckas.
-                break;
-            }
-        }
-
-        // Antal utgifter man är back = Totala utgifter - Antal täckta utgifter
-        long expensesBack = allExpenses.size() - coveredCount;
-
-        // Om alla utgifter täcktes, ska lastKvittDate vara idag (startvärdet).
-        if (expensesBack == 0) {
-            lastKvittDate = LocalDate.now();
-        }
+        // 2. DATUM: Hitta datumet för den SENASTE BETALDA utgiften
+        // (För texten "Senaste utgift som täcktes")
+        LocalDate lastKvittDate = allExpenses.stream()
+                .filter(Event::isPaid)
+                .map(e -> e.getDateTime().toLocalDate())
+                .max(Comparator.naturalOrder()) // Hitta nyaste datumet
+                .orElse(LocalDate.now());       // Om inget är betalt alls, visa idag
 
         return new KvittStatusResponseDTO(
                 expensesBack,
                 lastKvittDate
         );
     }
-
 
     private boolean userExists(String username) {
         return kvittUserRepository.findByUsername(username).isPresent();
