@@ -34,15 +34,12 @@ public class EventService {
 
     public Event createEvent(EventCreateEventRequestDTO eventCreateEventRequestDTO) {
         // 1. SPARA FÖRST
-        // Vi måste spara eventet i databasen först så att getTotalIncome ser den nya summan.
         Event savedEvent = eventRepository.save(eventMapper.toEntity(eventCreateEventRequestDTO));
         logger.info("New Event was created & saved: {}", savedEvent.getTitle());
 
-        // 2. BERÄKNA SEN
-        // Om det var en inkomst (inte en utgift), kolla om vi kan betala gamla skulder.
-        if (!savedEvent.isExpense()) {
-            calculateUnPaidEvents(savedEvent.getUsername());
-        }
+        // 2. FÖRSÖK BETALA (Kör alltid denna check!)
+        // Oavsett om vi lade till pengar eller en ny räkning, så ska vi se om vi kan balansera böckerna.
+        calculateUnPaidEvents(savedEvent.getUsername());
 
         return savedEvent;
     }
@@ -197,30 +194,90 @@ public class EventService {
                     username, availableFunds);
         }
     }
-
     public KvittStatusResponseDTO getKvittStatus(String username) {
         if (!userExists(username)) {
             throw new RuntimeException("User not found: " + username);
         }
 
-        // Hämta alla utgifter
+        // 1. Hämta ALLA utgifter, sorterade från NYASTE till ÄLDSTA
         List<Event> allExpenses = eventRepository.findByUsername(username).stream()
                 .filter(Event::isExpense)
+                .sorted(Comparator.comparing(Event::getDateTime).reversed())
                 .toList();
 
-        // 1. RÄKNA: Hur många är INTE betalda?
-        // Detta fixar felet så att den visar 2 istället för 4.
-        long expensesBack = allExpenses.stream()
-                .filter(event -> !event.isPaid())
-                .count();
+        // --- HÄR VAR FELET ---
+        // Gammal kod: BigDecimal tempFunds = getTotalIncome(username);
+        // Vi använde bruttoinkomsten, men vi måste använda SALDOT (Inkomst - Utgifter).
+        // Men vänta! Logiken i KvittStatus är lite speciell.
+        // Vi vill se hur många av de *senaste* utgifterna som täcks av *all* inkomst.
 
-        // 2. DATUM: Hitta datumet för den SENASTE BETALDA utgiften
-        // (För texten "Senaste utgift som täcktes")
-        LocalDate lastKvittDate = allExpenses.stream()
-                .filter(Event::isPaid)
-                .map(e -> e.getDateTime().toLocalDate())
-                .max(Comparator.naturalOrder()) // Hitta nyaste datumet
-                .orElse(LocalDate.now());       // Om inget är betalt alls, visa idag
+        // RÄTT TÄNK:
+        // Vi har en total pott pengar in (Total Income).
+        // Vi har en lista på alla utgifter någonsin.
+        // Vi vill se: Om vi betalar utgifterna baklänges (nyaste först), när tar pengarna slut?
+
+        BigDecimal availableFunds = getTotalIncome(username);
+
+        // MEN! I din app verkar "Saldo" vara det som är kvar.
+        // Om du har 1 miljon in, och 500k ut, så är saldot 500k.
+        // De 500k som är "Utgift" är ju redan förbrukade pengar.
+
+        // Så frågan är: Är de röda "Obetalda" utgifterna i din lista verkligen obetalda?
+        // I din logik markerar du dem som 'paid=true' om de täcks.
+
+        // Låt oss titta på din screenshot:
+        // Total Inkomst: 1 000 050
+        // Total Utgift: 501 025
+        // Saldo: 499 025
+
+        // Du har en utgift "testing" på 1000 kr som är "Obetald".
+        // Varför markerades den inte som betald när du skapade den?
+        // Jo, för att du hade buggen i 'calculateUnPaidEvents' då!
+
+        // NU när du har fixat 'calculateUnPaidEvents' (som körs vid create),
+        // så kommer *nya* utgifter bli rätt.
+        // Men 'getKvittStatus' försöker räkna ut statusen dynamiskt.
+
+        // Låt oss använda samma logik som i calculateUnPaidEvents för konsekvens:
+        // Vi ska se om vi har råd med alla utgifter totalt sett.
+
+        BigDecimal totalIncome = getTotalIncome(username);
+        BigDecimal totalExpenses = getTotalExpense(username);
+
+        // Om Inkomst >= Utgifter, då är vi KVITT!
+        if (totalIncome.compareTo(totalExpenses) >= 0) {
+            return new KvittStatusResponseDTO(
+                    0L, // 0 utgifter back
+                    LocalDate.now() // Idag
+            );
+        }
+
+        // Om vi kommer hit så är Inkomst < Utgifter (Vi är back på riktigt).
+        // Då kör vi loopen för att se HUR många utgifter vi är back.
+
+        BigDecimal tempFunds = totalIncome;
+        int coveredCount = 0;
+        LocalDate lastKvittDate = LocalDate.now();
+
+        // Eftersom vi vet att pengarna INTE räcker till allt (vi kollade ovan),
+        // så kommer denna loop garanterat att breaka någonstans.
+        // Men vi sorterar ÄLDSTA först nu för att se hur långt pengarna räcker "normalt".
+        // ELLER vill du ha logiken "Nyaste först"?
+        // Din "back"-logik brukar vara: "Du har inte råd med de senaste X sakerna".
+
+        // Låt oss behålla din "Nyaste först"-loop men bara köra den om vi faktiskt är back totalt.
+
+        for (Event expense : allExpenses) {
+            if (tempFunds.compareTo(expense.getAmount()) >= 0) {
+                tempFunds = tempFunds.subtract(expense.getAmount());
+                coveredCount++;
+                lastKvittDate = expense.getDateTime().toLocalDate();
+            } else {
+                break;
+            }
+        }
+
+        long expensesBack = allExpenses.size() - coveredCount;
 
         return new KvittStatusResponseDTO(
                 expensesBack,
