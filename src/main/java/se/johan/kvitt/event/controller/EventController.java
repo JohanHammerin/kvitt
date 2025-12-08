@@ -175,7 +175,7 @@ public class EventController {
     @GetMapping("/getPaidEvents")
     public ResponseEntity<Map<String, Object>> getPaidEvents(@RequestParam String username) {
         try {
-            List<Event> paidEvents = eventService.paidEvents(username);
+            List<Event> paidEvents = eventService.getPaidEvents(username);
 
             Map<String, Object> response = new HashMap<>();
             response.put("username", username);
@@ -202,7 +202,7 @@ public class EventController {
     @GetMapping("/getUnPaidEvents")
     public ResponseEntity<Map<String, Object>> getUnPaidEvents(@RequestParam String username) {
         try {
-            List<Event> unPaidEvents = eventService.unPaidEvents(username);
+            List<Event> unPaidEvents = eventService.getUnPaidEvents(username);
 
             Map<String, Object> response = new HashMap<>();
             response.put("username", username);

@@ -82,7 +82,7 @@ public class EventService {
         return totalIncome.subtract(totalExpense);
     }
 
-    public List<Event> paidEvents(String username) {
+    public List<Event> getPaidEvents(String username) {
         validateUser(username);
         return eventRepository.findByUsername(username)
                 .stream()
@@ -91,7 +91,7 @@ public class EventService {
                 .toList();
     }
 
-    public List<Event> unPaidEvents(String username) {
+    public List<Event> getUnPaidEvents(String username) {
         validateUser(username);
         return eventRepository.findByUsername(username)
                 .stream()
@@ -103,11 +103,11 @@ public class EventService {
     public KvittStatusResponseDTO getKvittStatus(String username) {
         validateUser(username);
 
-        // 1. Hämta total ekonomi för att se om vi är "plus" totalt sett
         BigDecimal totalIncome = getTotalIncome(username);
         BigDecimal totalExpenses = getTotalExpense(username);
 
         // Om Inkomst >= Utgifter är vi helt KVITT
+        // Detta täcker fallet där allt är betalt och saldot är positivt eller noll.
         if (totalIncome.compareTo(totalExpenses) >= 0) {
             return new KvittStatusResponseDTO(
                     0L,
@@ -115,28 +115,20 @@ public class EventService {
             );
         }
 
-        // 2. Om vi är back: Räkna ut exakt hur många utgifter vi ligger efter med
-        List<Event> allExpenses = eventRepository.findByUsername(username).stream()
+        // Om vi är back (Inkomst < Utgifter):
+        // Räkna helt enkelt hur många utgifter som har status paid=false i databasen.
+        long expensesBack = eventRepository.findByUsername(username).stream()
                 .filter(Event::isExpense)
-                .sorted(Comparator.comparing(Event::getDateTime).reversed()) // Nyaste först
-                .toList();
+                .filter(event -> !event.isPaid()) // Filtrera fram de som faktiskt är obetalda
+                .count();
 
-        BigDecimal tempFunds = totalIncome;
-        int coveredCount = 0;
-        LocalDate lastKvittDate = LocalDate.now();
-
-        for (Event expense : allExpenses) {
-            if (tempFunds.compareTo(expense.getAmount()) >= 0) {
-                tempFunds = tempFunds.subtract(expense.getAmount());
-                coveredCount++;
-                lastKvittDate = expense.getDateTime().toLocalDate();
-            } else {
-                // Pengarna tog slut här
-                break;
-            }
-        }
-
-        long expensesBack = allExpenses.size() - coveredCount;
+        // Hitta datumet för den senaste utgiften som faktiskt BLEV betald
+        LocalDate lastKvittDate = eventRepository.findByUsername(username).stream()
+                .filter(Event::isExpense)
+                .filter(Event::isPaid) // Bara betalda
+                .max(Comparator.comparing(Event::getDateTime)) // Ta den nyaste av de betalda
+                .map(event -> event.getDateTime().toLocalDate())
+                .orElse(LocalDate.now()); // Om inga betalda finns, använd dagens datum
 
         return new KvittStatusResponseDTO(
                 expensesBack,
@@ -146,10 +138,6 @@ public class EventService {
 
     // --- Privata Hjälpmetoder ---
 
-    /**
-     * Beräknar och uppdaterar status på obetalda utgifter baserat på tillgängligt saldo.
-     * Prioriterar att betala äldsta utgifterna först.
-     */
     private void calculateUnPaidEvents(String username) {
         validateUser(username);
 
@@ -162,7 +150,6 @@ public class EventService {
         logger.info("Calculating unpaid events. Available funds: {}", availableFunds);
 
         List<Event> updatedEvents = new ArrayList<>();
-        int expensesPaidCount = 0;
 
         for (Event expense : unpaidExpenses) {
             if (availableFunds.compareTo(expense.getAmount()) >= 0) {
@@ -170,7 +157,6 @@ public class EventService {
                 updatedEvents.add(expense);
 
                 availableFunds = availableFunds.subtract(expense.getAmount());
-                expensesPaidCount++;
 
                 logger.debug("Marked expense '{}' ({}) as PAID.", expense.getTitle(), expense.getAmount());
             } else {
