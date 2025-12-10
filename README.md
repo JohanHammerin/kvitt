@@ -58,4 +58,6 @@
 
 **2025-11-24**
 - Har under en längre tid krigat på med JWT och roller. Men igår kunde jag stolt säga att ``JWT`` samt roller är nu en del av ``Kvitt``.
-- 
+
+**2025-12-08**
+- Kopplade ihop mig med frontend.
