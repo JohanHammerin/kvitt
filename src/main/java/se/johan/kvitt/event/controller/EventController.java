@@ -45,6 +45,12 @@ public class EventController {
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(edited);
     }
 
+    @DeleteMapping("/delete")
+    public ResponseEntity<String> deleteEvent(@RequestParam String id) {
+        eventService.deleteEvent(id);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(id);
+    }
+
     @GetMapping("/getAllEvents")
     public ResponseEntity<Map<String, Object>> getAllEventsByUsername(@RequestParam String username) {
         // Kontrollera om användaren finns

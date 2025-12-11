@@ -61,6 +61,10 @@ public class EventService {
         return null;
     }
 
+    public void deleteEvent(String id) {
+        eventRepository.deleteById(id);
+    }
+
     public List<EventGetAllEventsByUsernameResponseDTO> getAllEventsByUsername(String username) {
         logger.info("{} requested all events", username);
         validateUser(username);
