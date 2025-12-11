@@ -6,7 +6,7 @@ import jakarta.validation.constraints.Positive;
 
 import java.math.BigDecimal;
 
-public record EventCreateEventRequestDTO(
+public record CreateEventDto(
         @NotBlank(message = "Title is required")
         String title,
 

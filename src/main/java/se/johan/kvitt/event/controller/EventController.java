@@ -5,7 +5,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import se.johan.kvitt.event.dto.request.EventCreateEventRequestDTO;
+import se.johan.kvitt.event.dto.request.CreateEventDto;
+import se.johan.kvitt.event.dto.request.EditEventDto;
 import se.johan.kvitt.event.dto.response.EventGetAllEventsByUsernameResponseDTO;
 // 👈 NY IMPORT: Lägg till din KvittStatus DTO
 import se.johan.kvitt.event.dto.response.KvittStatusResponseDTO;
@@ -33,9 +34,15 @@ public class EventController {
     }
 
     @PostMapping("/create")
-    public ResponseEntity<Event> createEvent(@Valid @RequestBody EventCreateEventRequestDTO eventCreateEventRequestDTO) {
-        Event created = eventService.createEvent(eventCreateEventRequestDTO);
+    public ResponseEntity<Event> createEvent(@Valid @RequestBody CreateEventDto dto) {
+        Event created = eventService.createEvent(dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
+    }
+
+    @PutMapping("/edit")
+    public ResponseEntity<Event> editEvent(@Valid @RequestBody EditEventDto dto) {
+        Event edited = eventService.editEvent(dto);
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(edited);
     }
 
     @GetMapping("/getAllEvents")

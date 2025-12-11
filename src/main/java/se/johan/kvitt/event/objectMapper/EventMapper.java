@@ -1,7 +1,7 @@
 package se.johan.kvitt.event.objectMapper;
 
 import org.springframework.stereotype.Component;
-import se.johan.kvitt.event.dto.request.EventCreateEventRequestDTO;
+import se.johan.kvitt.event.dto.request.CreateEventDto;
 import se.johan.kvitt.event.dto.response.EventGetAllEventsByUsernameResponseDTO;
 import se.johan.kvitt.event.model.Event;
 
@@ -10,15 +10,15 @@ import java.time.LocalDateTime;
 @Component
 public class EventMapper {
 
-    public Event toEntity(EventCreateEventRequestDTO eventCreateEventRequestDTO) {
+    public Event toEntity(CreateEventDto createEventDto) {
         return new Event(
                 null,
-                eventCreateEventRequestDTO.title(),
-                eventCreateEventRequestDTO.amount(),
-                eventCreateEventRequestDTO.expense(),
+                createEventDto.title(),
+                createEventDto.amount(),
+                createEventDto.expense(),
                 LocalDateTime.now(),
-                eventCreateEventRequestDTO.paid(),
-                eventCreateEventRequestDTO.username()
+                createEventDto.paid(),
+                createEventDto.username()
         );
     }
 

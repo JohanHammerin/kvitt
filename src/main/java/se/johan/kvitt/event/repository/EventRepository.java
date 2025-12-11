@@ -12,6 +12,7 @@ public interface EventRepository extends MongoRepository<Event, String> {
     // Används för att hämta ALLA events för en användare (bra för getTotalX etc.)
     List<Event> findByUsername(String username);
 
+
     // NY METOD: Hämta utgifter (expense=true) som inte är betalda (paid=false)
     List<Event> findByUsernameAndExpenseTrueAndPaidFalseOrderByDateTimeAsc(String username);
 }

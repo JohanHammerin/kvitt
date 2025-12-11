@@ -18,7 +18,7 @@ public class AppCorsConfig {
 
         // Whitelist
         corsConfiguration.setAllowedOrigins(List.of("http://localhost:3000", "http://172.0.0.1:3000")); // VERCEL ADDRESS / DOMAIN
-        corsConfiguration.setAllowedMethods(List.of("GET", "POST"));                                    // HTTP METHODS
+        corsConfiguration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE"));                                    // HTTP METHODS
         corsConfiguration.setAllowedHeaders(List.of("Content-Type", "Authorization", "X-Requested-With")); // TODO - Session based? Unnecessary?
         corsConfiguration.setAllowCredentials(true); // Send Cookies
 

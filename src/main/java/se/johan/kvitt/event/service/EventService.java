@@ -4,7 +4,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import se.johan.kvitt.event.dto.request.EventCreateEventRequestDTO;
+import se.johan.kvitt.event.dto.request.CreateEventDto;
+import se.johan.kvitt.event.dto.request.EditEventDto;
 import se.johan.kvitt.event.dto.response.EventGetAllEventsByUsernameResponseDTO;
 import se.johan.kvitt.event.dto.response.KvittStatusResponseDTO;
 import se.johan.kvitt.event.model.Event;
@@ -17,6 +18,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class EventService {
@@ -33,15 +35,30 @@ public class EventService {
         this.kvittUserRepository = kvittUserRepository;
     }
 
-    public Event createEvent(EventCreateEventRequestDTO eventCreateEventRequestDTO) {
+    public Event createEvent(CreateEventDto dto) {
         // 1. Spara eventet först för att uppdatera saldot
-        Event savedEvent = eventRepository.save(eventMapper.toEntity(eventCreateEventRequestDTO));
+        Event savedEvent = eventRepository.save(eventMapper.toEntity(dto));
         logger.info("New Event created & saved: {}", savedEvent.getTitle());
 
         // 2. Försök alltid betala obetalda utgifter (oavsett om det var inkomst eller utgift som lades till)
         calculateUnPaidEvents(savedEvent.getUsername());
 
         return savedEvent;
+    }
+
+    public Event editEvent(EditEventDto dto) {
+        Optional<Event> editedEvent = eventRepository.findById(dto.id());
+        if (editedEvent.isPresent()) {
+            Event event = editedEvent.get();
+            event.setTitle(dto.title());
+            event.setAmount(dto.amount());
+            event.setExpense(dto.expense());
+            event.setDateTime(dto.dateTime());
+
+            eventRepository.save(event);
+            return event;
+        }
+        return null;
     }
 
     public List<EventGetAllEventsByUsernameResponseDTO> getAllEventsByUsername(String username) {
