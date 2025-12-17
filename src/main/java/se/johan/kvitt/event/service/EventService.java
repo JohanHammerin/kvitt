@@ -56,13 +56,39 @@ public class EventService {
             event.setDateTime(dto.dateTime());
 
             eventRepository.save(event);
+
+            rebootPaidStatus(event.getUsername());
+
+
+            calculateUnPaidEvents(event.getUsername());
+
+            getKvittStatus(event.getUsername());
             return event;
         }
         return null;
     }
 
+    private void rebootPaidStatus(String username) {
+        List<Event> allEvents = eventRepository.findByUsername(username);
+
+        allEvents.stream()
+                .filter(Event::isExpense)
+                .forEach(event -> event.setPaid(false));
+
+        eventRepository.saveAll(allEvents);
+    }
+
     public void deleteEvent(String id) {
-        eventRepository.deleteById(id);
+        // 1. Hitta eventet först för att veta vilken användare det tillhör
+        Optional<Event> eventOptional = eventRepository.findById(id);
+
+        if (eventOptional.isPresent()) {
+            String username = eventOptional.get().getUsername();
+
+            eventRepository.deleteById(id);
+            rebootPaidStatus(username);
+            calculateUnPaidEvents(username);
+        }
     }
 
     public List<EventGetAllEventsByUsernameResponseDTO> getAllEventsByUsername(String username) {
@@ -127,29 +153,20 @@ public class EventService {
         BigDecimal totalIncome = getTotalIncome(username);
         BigDecimal totalExpenses = getTotalExpense(username);
 
-        // Om Inkomst >= Utgifter är vi helt KVITT
-        // Detta täcker fallet där allt är betalt och saldot är positivt eller noll.
-        if (totalIncome.compareTo(totalExpenses) >= 0) {
-            return new KvittStatusResponseDTO(
-                    0L,
-                    LocalDate.now()
-            );
-        }
-
-        // Om vi är back (Inkomst < Utgifter):
-        // Räkna helt enkelt hur många utgifter som har status paid=false i databasen.
+        // Om vi är back, räkna obetalda utgifter
         long expensesBack = eventRepository.findByUsername(username).stream()
                 .filter(Event::isExpense)
-                .filter(event -> !event.isPaid()) // Filtrera fram de som faktiskt är obetalda
+                .filter(event -> !event.isPaid())
                 .count();
 
-        // Hitta datumet för den senaste utgiften som faktiskt BLEV betald
+        // Hitta datumet för den senaste utgiften som är markerad som BETALD
+        // Det är detta datum som visas som "Senaste utgift som täcktes"
         LocalDate lastKvittDate = eventRepository.findByUsername(username).stream()
                 .filter(Event::isExpense)
-                .filter(Event::isPaid) // Bara betalda
-                .max(Comparator.comparing(Event::getDateTime)) // Ta den nyaste av de betalda
+                .filter(Event::isPaid) // <--- Viktigt: Endast betalda påverkar detta datum
                 .map(event -> event.getDateTime().toLocalDate())
-                .orElse(LocalDate.now()); // Om inga betalda finns, använd dagens datum
+                .max(Comparator.naturalOrder())
+                .orElse(LocalDate.now());
 
         return new KvittStatusResponseDTO(
                 expensesBack,
