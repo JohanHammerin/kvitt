@@ -40,8 +40,7 @@ public class AppSecurityConfig {
         @Bean
         public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
             httpSecurity
-                    // 3. ÄNDRA HÄR: Koppla din specifika källkod
-                    .cors(cors -> cors.configurationSource(corsConfigurationSource)) // ANVÄND DENNA                    .csrf(csrf -> csrf.disable())
+                    .cors(cors -> cors.configurationSource(corsConfigurationSource))
                     .authorizeHttpRequests(auth -> auth
                             .requestMatchers(
                                     "/api/v1/kvittUser/create",
