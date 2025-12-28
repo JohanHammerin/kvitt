@@ -17,7 +17,7 @@ public class AppCorsConfig {
         CorsConfiguration corsConfiguration = new CorsConfiguration();
 
         // Whitelist
-        corsConfiguration.setAllowedOrigins(List.of("http://localhost:3000", "https://kvitt.onrender.com/")); // VERCEL ADDRESS / DOMAIN
+        corsConfiguration.setAllowedOrigins(List.of("http://localhost:3000", "https://kvitt-frontend-v5no.vercel.app")); // VERCEL ADDRESS / DOMAIN
         corsConfiguration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE"));                                    // HTTP METHODS
         corsConfiguration.setAllowedHeaders(List.of("Content-Type", "Authorization", "X-Requested-With"));
         corsConfiguration.setAllowCredentials(true); // Send Cookies
