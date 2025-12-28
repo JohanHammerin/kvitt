@@ -6,6 +6,7 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import java.util.Collections;
 import java.util.List;
 
 @Configuration
@@ -17,7 +18,7 @@ public class AppCorsConfig {
         CorsConfiguration corsConfiguration = new CorsConfiguration();
 
         // Whitelist
-        corsConfiguration.setAllowedOrigins(List.of("http://localhost:3000", "http://172.0.0.1:3000")); // VERCEL ADDRESS / DOMAIN
+        corsConfiguration.setAllowedOrigins(Collections.singletonList("https://kvitt-frontend-v5no.vercel.app")); // VERCEL ADDRESS / DOMAIN
         corsConfiguration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE"));                                    // HTTP METHODS
         corsConfiguration.setAllowedHeaders(List.of("Content-Type", "Authorization", "X-Requested-With"));
         corsConfiguration.setAllowCredentials(true); // Send Cookies
