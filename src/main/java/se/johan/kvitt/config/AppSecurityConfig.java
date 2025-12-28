@@ -10,6 +10,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfigurationSource;
 import se.johan.kvitt.auth.UserRole;
 import se.johan.kvitt.auth.UserRoleName;
 import se.johan.kvitt.kvittUser.jwt.JwtAuthenticationFilter;
@@ -20,10 +21,13 @@ import se.johan.kvitt.kvittUser.jwt.JwtAuthenticationFilter;
 public class AppSecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final CorsConfigurationSource corsConfigurationSource; // 1. Lägg till denna
+
 
     @Autowired
-    public AppSecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter) {
+    public AppSecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter, CorsConfigurationSource corsConfigurationSource) {
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+        this.corsConfigurationSource = corsConfigurationSource;
     }
 
     @Bean
@@ -32,44 +36,26 @@ public class AppSecurityConfig {
     }
 
 
-    @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
-        httpSecurity
-                .cors(cors -> cors.configure(httpSecurity)) // 👈 LÄGG TILL DENNA RAD!
-                .csrf(csrfConfigurer -> csrfConfigurer.disable())   // Disable for DEBUGGING PURPOSES
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(
-                                "/api/v1/kvittUser/create",
-                                "/api/v1/kvittUser/login",
-                                "/api/v1/event/test"
-                        )
-                        .permitAll()
-                        .anyRequest().authenticated()
-                )
-
-                .sessionManagement(session -> session
-                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                )
-
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
-
-        return httpSecurity.build();
-    }
-}
-
-/*
 
         @Bean
-        public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-            http
+        public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
+            httpSecurity
+                    // 3. ÄNDRA HÄR: Koppla din specifika källkod
+                    .cors(cors -> cors.configurationSource(corsConfigurationSource))
                     .csrf(csrf -> csrf.disable())
-                    .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
-                    .httpBasic(httpBasic -> httpBasic.disable())
-                    .formLogin(form -> form.disable())
-                    .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+                    .authorizeHttpRequests(auth -> auth
+                            .requestMatchers(
+                                    "/api/v1/kvittUser/create",
+                                    "/api/v1/kvittUser/login",
+                                    "/api/v1/event/test"
+                            ).permitAll()
+                            .anyRequest().authenticated()
+                    )
+                    .sessionManagement(session -> session
+                            .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                    )
+                    .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
-            return http.build();
+            return httpSecurity.build();
         }
     }
-
-*/
