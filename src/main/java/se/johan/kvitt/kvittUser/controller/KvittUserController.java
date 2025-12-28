@@ -51,6 +51,7 @@ public class KvittUserController {
                     .secure(true)        // Sätt till true om du kör HTTPS (i prod)
                     .path("/")            // Kakan gäller för hela applikationen
                     .maxAge(Duration.ofHours(24)) // Samma tid som din JWT giltighet
+                    .sameSite("None")   // Skyddar mot CSRF
                     .build();
 
             System.out.println("✅ Token generated and cookie created");
