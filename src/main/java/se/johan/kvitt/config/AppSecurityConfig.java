@@ -41,6 +41,7 @@ public class AppSecurityConfig {
         public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
             httpSecurity
                     .cors(cors -> cors.configurationSource(corsConfigurationSource))
+                    .csrf(csrf -> csrf.disable())
                     .authorizeHttpRequests(auth -> auth
                             .requestMatchers(
                                     "/api/v1/kvittUser/create",
