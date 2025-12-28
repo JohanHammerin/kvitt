@@ -48,7 +48,7 @@ public class KvittUserController {
             // 2. Skapa en HttpOnly Cookie
             ResponseCookie jwtCookie = ResponseCookie.from("jwtToken", token)
                     .httpOnly(true)       // Gör att JavaScript inte kan läsa kakan (skyddar mot XSS)
-                    .secure(false)        // Sätt till true om du kör HTTPS (i prod)
+                    .secure(true)        // Sätt till true om du kör HTTPS (i prod)
                     .path("/")            // Kakan gäller för hela applikationen
                     .maxAge(Duration.ofHours(24)) // Samma tid som din JWT giltighet
                     .sameSite("None")   // Skyddar mot CSRF
