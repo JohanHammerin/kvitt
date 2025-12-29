@@ -61,3 +61,6 @@
 
 **2025-12-08**
 - Kopplade ihop mig med frontend.
+
+**2025-12-28**
+- Hostade backend via Render och frontend via Vercel.
