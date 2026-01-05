@@ -1,11 +1,5 @@
 package se.johan.kvitt.auth;
 
-/* UserRole: Handles Authorities
-*   Should contain both ROLE + PERMISSIONS
-*   Should contain a way to return SimpleGrantedAuthority (Spring Class)
-*   import static - removes the class requirement for Variables (no more dots)
-*       NOTE: The class still exists, but is not necessary to call
-* */
 
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
@@ -20,7 +14,7 @@ public enum UserRole {
     
     GUEST(
             UserRoleName.GUEST.getRoleName(),
-            Set.of() // 0 Permissions // READ permission could be available here!
+            Set.of()
     ),
     
     USER(
@@ -56,12 +50,10 @@ public enum UserRole {
         return userPermissions;
     }
 
-    // Get a LIST that Spring understands - containing both ROLE + PERMISSION
     public List<SimpleGrantedAuthority> getUserAuthorities() {
 
         List<SimpleGrantedAuthority> authorityList = new ArrayList<>();
 
-        // this == the choice made after UserRole. (e.g: UserRole.ADMIN)
         authorityList.add(new SimpleGrantedAuthority(this.roleName));
         authorityList.addAll(
                 this.userPermissions.stream().map(

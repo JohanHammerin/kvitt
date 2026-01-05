@@ -1,8 +1,5 @@
 package se.johan.kvitt.auth;
 
-/* Handles the ROLE_ concatenation
-*   This ENUM is essentially just a value holder
-* */
 
 public enum UserRoleName {
 
