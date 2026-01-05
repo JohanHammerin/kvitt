@@ -11,8 +11,6 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfigurationSource;
-import se.johan.kvitt.auth.UserRole;
-import se.johan.kvitt.auth.UserRoleName;
 import se.johan.kvitt.kvittUser.jwt.JwtAuthenticationFilter;
 
 
@@ -21,7 +19,7 @@ import se.johan.kvitt.kvittUser.jwt.JwtAuthenticationFilter;
 public class AppSecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
-    private final CorsConfigurationSource corsConfigurationSource; // 1. Lägg till denna
+    private final CorsConfigurationSource corsConfigurationSource;
 
 
     @Autowired
@@ -32,7 +30,7 @@ public class AppSecurityConfig {
 
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
-        return configuration.getAuthenticationManager(); // Handles: Password Encoder, UserDetailsService, Authentication
+        return configuration.getAuthenticationManager();
     }
 
 

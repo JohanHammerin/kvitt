@@ -16,15 +16,15 @@ public class AppCorsConfig {
 
         CorsConfiguration corsConfiguration = new CorsConfiguration();
 
-        // Whitelist
-        corsConfiguration.setAllowedOrigins(List.of("http://localhost:3000", "https://kvitt-frontend-v5no.vercel.app", "https://kvitt-frontend-v5no.vercel.app/")); // VERCEL ADDRESS / DOMAIN
-        corsConfiguration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE"));                                    // HTTP METHODS
+
+        corsConfiguration.setAllowedOrigins(List.of("http://localhost:3000", "https://kvitt-frontend-v5no.vercel.app", "https://kvitt-frontend-v5no.vercel.app/"));
+        corsConfiguration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE"));
         corsConfiguration.setAllowedHeaders(List.of("Content-Type", "Authorization", "X-Requested-With"));
         corsConfiguration.setAllowCredentials(true); // Send Cookies
 
-        // Backend related endpoints
+
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", corsConfiguration); // ENABLE EVERYTHING
+        source.registerCorsConfiguration("/**", corsConfiguration);
 
         return source;
     }
