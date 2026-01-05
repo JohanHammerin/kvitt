@@ -36,11 +36,9 @@ public class EventService {
     }
 
     public Event createEvent(CreateEventDto dto) {
-        // 1. Spara eventet först för att uppdatera saldot
         Event savedEvent = eventRepository.save(eventMapper.toEntity(dto));
         logger.info("New Event created & saved: {}", savedEvent.getTitle());
 
-        // 2. Försök alltid betala obetalda utgifter (oavsett om det var inkomst eller utgift som lades till)
         calculateUnPaidEvents(savedEvent.getUsername());
 
         return savedEvent;
@@ -54,14 +52,10 @@ public class EventService {
             event.setAmount(dto.amount());
             event.setExpense(dto.expense());
             event.setDateTime(dto.dateTime());
-
             eventRepository.save(event);
 
             rebootPaidStatus(event.getUsername());
-
-
             calculateUnPaidEvents(event.getUsername());
-
             getKvittStatus(event.getUsername());
             return event;
         }
@@ -70,7 +64,6 @@ public class EventService {
 
     private void rebootPaidStatus(String username) {
         List<Event> allEvents = eventRepository.findByUsername(username);
-
         allEvents.stream()
                 .filter(Event::isExpense)
                 .forEach(event -> event.setPaid(false));
@@ -79,7 +72,6 @@ public class EventService {
     }
 
     public void deleteEvent(String id) {
-        // 1. Hitta eventet först för att veta vilken användare det tillhör
         Optional<Event> eventOptional = eventRepository.findById(id);
 
         if (eventOptional.isPresent()) {
@@ -92,8 +84,6 @@ public class EventService {
     }
 
     public List<EventGetAllEventsByUsernameResponseDTO> getAllEventsByUsername(String username) {
-        logger.info("{} requested all events", username);
-        validateUser(username);
 
         List<Event> events = eventRepository.findByUsername(username);
         logger.info("Found {} events for user: {}", events.size(), username);
@@ -104,7 +94,6 @@ public class EventService {
     }
 
     public BigDecimal getTotalIncome(String username) {
-        validateUser(username);
         return eventRepository.findByUsername(username)
                 .stream()
                 .filter(event -> !event.isExpense())
@@ -113,7 +102,6 @@ public class EventService {
     }
 
     public BigDecimal getTotalExpense(String username) {
-        validateUser(username);
         return eventRepository.findByUsername(username)
                 .stream()
                 .filter(Event::isExpense)
@@ -122,7 +110,6 @@ public class EventService {
     }
 
     public BigDecimal getFinancials(String username) {
-        // validateUser anropas inuti getTotalIncome/Expense
         BigDecimal totalIncome = getTotalIncome(username);
         BigDecimal totalExpense = getTotalExpense(username);
 
@@ -130,7 +117,6 @@ public class EventService {
     }
 
     public List<Event> getPaidEvents(String username) {
-        validateUser(username);
         return eventRepository.findByUsername(username)
                 .stream()
                 .filter(Event::isExpense)
@@ -139,7 +125,6 @@ public class EventService {
     }
 
     public List<Event> getUnPaidEvents(String username) {
-        validateUser(username);
         return eventRepository.findByUsername(username)
                 .stream()
                 .filter(Event::isExpense)
@@ -148,22 +133,16 @@ public class EventService {
     }
 
     public KvittStatusResponseDTO getKvittStatus(String username) {
-        validateUser(username);
 
-        BigDecimal totalIncome = getTotalIncome(username);
-        BigDecimal totalExpenses = getTotalExpense(username);
 
-        // Om vi är back, räkna obetalda utgifter
         long expensesBack = eventRepository.findByUsername(username).stream()
                 .filter(Event::isExpense)
                 .filter(event -> !event.isPaid())
                 .count();
 
-        // Hitta datumet för den senaste utgiften som är markerad som BETALD
-        // Det är detta datum som visas som "Senaste utgift som täcktes"
         LocalDate lastKvittDate = eventRepository.findByUsername(username).stream()
                 .filter(Event::isExpense)
-                .filter(Event::isPaid) // <--- Viktigt: Endast betalda påverkar detta datum
+                .filter(Event::isPaid)
                 .map(event -> event.getDateTime().toLocalDate())
                 .max(Comparator.naturalOrder())
                 .orElse(LocalDate.now());
@@ -177,8 +156,6 @@ public class EventService {
     // --- Privata Hjälpmetoder ---
 
     private void calculateUnPaidEvents(String username) {
-        validateUser(username);
-
         BigDecimal totalIncome = getTotalIncome(username);
         BigDecimal alreadyPaidAmount = getTotalPaidExpensesAmount(username);
         BigDecimal availableFunds = totalIncome.subtract(alreadyPaidAmount);
@@ -218,10 +195,5 @@ public class EventService {
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
-    private void validateUser(String username) {
-        if (kvittUserRepository.findByUsername(username).isEmpty()) {
-            logger.warn("User not found: {}", username);
-            throw new RuntimeException("User not found: " + username);
-        }
-    }
+
 }

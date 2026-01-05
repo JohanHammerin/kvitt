@@ -87,16 +87,4 @@ public class Event {
         this.username = username;
     }
 
-    @Override
-    public String toString() {
-        return "Event{" +
-                "id='" + id + '\'' +
-                ", title='" + title + '\'' +
-                ", amount=" + amount +
-                ", expense=" + expense +
-                ", dateTime=" + dateTime +
-                ", paid=" + paid +
-                ", username='" + username + '\'' +
-                '}';
-    }
 }

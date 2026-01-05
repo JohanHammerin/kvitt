@@ -44,7 +44,6 @@ public class EventController {
 
     @GetMapping("/getAllEvents")
     public ResponseEntity<List<EventGetAllEventsByUsernameResponseDTO>> getAllEventsByUsername(@RequestParam String username) {
-        // Servicen kastar exception om användaren inte finns -> Global Handler fångar det.
         return ResponseEntity.ok(eventService.getAllEventsByUsername(username));
     }
 
