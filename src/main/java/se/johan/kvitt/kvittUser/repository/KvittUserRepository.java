@@ -8,6 +8,5 @@ import java.util.Optional;
 
 @Repository
 public interface KvittUserRepository extends MongoRepository<KvittUser, String> {
-    // Fungerar perfekt - söker nu bara i "users" collection
     Optional<KvittUser> findByUsername(String username);
 }

@@ -37,7 +37,7 @@ public class KvittUserService {
     }
 
     public String login(KvittUserLoginRequestDTO dto) {
-        Authentication authentication = authenticationManager.authenticate(
+        authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(dto.username(), dto.password())
         );
 

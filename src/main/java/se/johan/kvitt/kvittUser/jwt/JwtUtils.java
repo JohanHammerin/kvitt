@@ -3,8 +3,10 @@ package se.johan.kvitt.kvittUser.jwt;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import se.johan.kvitt.auth.UserRole;
 import se.johan.kvitt.kvittUser.model.KvittUser;
@@ -21,13 +23,30 @@ import java.util.stream.Collectors;
 public class JwtUtils {
 
     private static final Logger logger = LoggerFactory.getLogger(JwtUtils.class);
-    private final String base64EncodedSecretKey =
-            "eDJbzt6SgSpS2FS4XDlrVlQohJvlip1PXs/gE/xkaRB4AgOnobDlr5AkRUX8wqN8nr7nB45Q7Dl/";
-    private final byte[] keyBytes =
-            Base64.getDecoder().decode(base64EncodedSecretKey);
-    private final SecretKey key = Keys.hmacShaKeyFor(keyBytes); // Skapar en kryptografisk nyckel, som skyddar oss från John Pork
-    // JWT expire in 1 hour
+    // Hämtar värdet från application.properties (secretBase64= ${BASE64})
+    @Value("${secretBase64}")
+    private String base64EncodedSecretKey;
+
+    private SecretKey key;
+
     private final int jwtExpirationMs = (int) TimeUnit.HOURS.toMillis(24);
+
+    /**
+     * Denna metod körs automatiskt när Spring har injicerat alla värden.
+     * Vi skapar den kryptografiska nyckeln härifrån istället för direkt vid variabeln.
+     */
+    @PostConstruct
+    public void init() {
+        try {
+            // Trimma eventuella mellanslag som kan uppstå vid miljövariabel-injektion
+            byte[] keyBytes = Base64.getDecoder().decode(base64EncodedSecretKey.trim());
+            this.key = Keys.hmacShaKeyFor(keyBytes);
+            logger.info("✅ JwtUtils initialized: Cryptographic key generated successfully.");
+        } catch (Exception e) {
+            logger.error("❌ Failed to initialize JWT key: {}", e.getMessage());
+            throw new RuntimeException("Could not initialize JWT key", e);
+        }
+    }
 
 
     public String generateJwtToken(KvittUser kvittUser) {

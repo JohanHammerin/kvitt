@@ -29,35 +29,26 @@ public class KvittUserController {
     }
 
     @PostMapping("/create")
-    public ResponseEntity<KvittUser> createKvittUser(
-            @Valid @RequestBody KvittUserCreateKvittUserRequestDTO kvittUserCreateKvittUserRequestDTO
-    ) {
+    public ResponseEntity<KvittUser> createKvittUser(@Valid @RequestBody KvittUserCreateKvittUserRequestDTO kvittUserCreateKvittUserRequestDTO) {
         KvittUser created = kvittUserService.createKvittUser(kvittUserCreateKvittUserRequestDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
     @PostMapping("/login")
-    public ResponseEntity<KvittUserLoginResponseDTO> login(
-            @Valid @RequestBody KvittUserLoginRequestDTO dto
-    ) {
-        System.out.println("🔑 LOGIN endpoint reached! Username: " + dto.username());
+    public ResponseEntity<KvittUserLoginResponseDTO> login(@Valid @RequestBody KvittUserLoginRequestDTO dto) {
         try {
-            // 1. Hämta token strängen från service
             String token = kvittUserService.login(dto);
 
-            // 2. Skapa en HttpOnly Cookie
             ResponseCookie jwtCookie = ResponseCookie.from("jwtToken", token)
-                    .httpOnly(true)       // Gör att JavaScript inte kan läsa kakan (skyddar mot XSS)
-                    .secure(true)        // Sätt till true om du kör HTTPS (i prod)
-                    .path("/")            // Kakan gäller för hela applikationen
-                    .maxAge(Duration.ofHours(24)) // Samma tid som din JWT giltighet
-                    .sameSite("None")   // Skyddar mot CSRF
+                    .httpOnly(true)
+                    .secure(true)
+                    .path("/")
+                    .maxAge(Duration.ofHours(24))
+                    .sameSite("None")
                     .build();
 
             System.out.println("✅ Token generated and cookie created");
 
-            // 3. Returnera Username i body, men Token i Header
-            // Notera: Vi skickar null eller tom sträng för token i DTO:n eftersom den ligger i kakan nu
             return ResponseEntity.ok()
                     .header(HttpHeaders.SET_COOKIE, jwtCookie.toString())
                     .body(new KvittUserLoginResponseDTO(dto.username(), null));

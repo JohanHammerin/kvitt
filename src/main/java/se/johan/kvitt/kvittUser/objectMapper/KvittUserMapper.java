@@ -22,7 +22,6 @@ public class KvittUserMapper {
 
     public KvittUser toEntity(KvittUserCreateKvittUserRequestDTO kvittUserCreateKvittUserRequestDTO) {
 
-        // Skapa en Set med USER-rollen
         Set<UserRole> roles = new HashSet<>();
         roles.add(UserRole.USER);
 

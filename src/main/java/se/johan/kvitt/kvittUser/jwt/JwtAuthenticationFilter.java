@@ -38,10 +38,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String path = request.getRequestURI();
-        boolean shouldSkip = path.equals("/api/v1/kvittUser/create") ||
-                path.equals("/api/v1/kvittUser/login");
+        boolean shouldSkip = path.equals("/api/v1/kvittUser/create") || path.equals("/api/v1/kvittUser/login");
 
-        System.out.println("🔍 JWT Filter - Path: '" + path + "' | Should skip: " + shouldSkip);
 
         return shouldSkip;
     }
@@ -80,7 +78,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             logger.debug("No valid JWT token found");
         }
 
-        // Kör alltid filterkedjan
         filterChain.doFilter(request, response);
         logger.debug("---------JwtAuthenticationFilter END---------");
     }
@@ -90,7 +87,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private String extractJwtFromCookie(HttpServletRequest request) {
         if (request.getCookies() == null) return null;
         for (Cookie cookie : request.getCookies()) {
-            // ÄNDRING: Byt "authToken" mot "jwtToken"
             if ("jwtToken".equals(cookie.getName())) {
                 return cookie.getValue();
             }

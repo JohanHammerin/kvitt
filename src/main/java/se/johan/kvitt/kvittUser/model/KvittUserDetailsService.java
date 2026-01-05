@@ -25,7 +25,7 @@ public class KvittUserDetailsService implements UserDetailsService {
                 );
 
 
-        return new KvittUserDetails(kvittUser); // CustomUserDetails contains an Entity
+        return new KvittUserDetails(kvittUser);
     }
 }
 
