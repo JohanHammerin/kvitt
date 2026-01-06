@@ -47,8 +47,11 @@ public class KvittUserController {
                     .sameSite("None")
                     .build();
 
+            // Lägg till Partitioned manuellt för att stödja moderna webbläsarkrav (CHIPS)
+            String cookieWithPartitioned = jwtCookie + "; Partitioned";
+
             return ResponseEntity.ok()
-                    .header(HttpHeaders.SET_COOKIE, jwtCookie.toString())
+                    .header(HttpHeaders.SET_COOKIE, cookieWithPartitioned)
                     .body(new KvittUserLoginResponseDTO(dto.username(), null));
 
         } catch (Exception e) {
