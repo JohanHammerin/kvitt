@@ -40,7 +40,7 @@ public class KvittUserController {
         try {
             String token = kvittUserService.login(dto);
 
-            ResponseCookie jwtCookie = ResponseCookie.from("jwtToken", token)
+            ResponseCookie jwtCookie = ResponseCookie.from("token", token)
                     .httpOnly(true)
                     .secure(true)
                     .path("/")
