@@ -47,15 +47,11 @@ public class KvittUserController {
                     .sameSite("None")
                     .build();
 
-            System.out.println("✅ Token generated and cookie created");
-
             return ResponseEntity.ok()
                     .header(HttpHeaders.SET_COOKIE, jwtCookie.toString())
                     .body(new KvittUserLoginResponseDTO(dto.username(), null));
 
         } catch (Exception e) {
-            System.err.println("❌ Login failed: " + e.getMessage());
-            e.printStackTrace();
             throw e;
         }
     }
