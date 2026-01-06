@@ -30,7 +30,9 @@ public class AppCorsConfig {
         corsConfiguration.setAllowedOrigins(List.of(
                 "http://localhost:3000",
                 "https://kvitt-frontend.vercel.app",
-                "https://kvitt-frontend.vercel.app/"
+                "https://kvitt-frontend.vercel.app/",
+                "https://kvitt-frontend.onrender.com",
+                "https://kvitt-frontend.onrender.com/"
         ));
 
         // Tillåtna HTTP-metoder
