@@ -34,6 +34,7 @@ public class KvittUserController {
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
+    /*
     @PostMapping("/login")
     public ResponseEntity<KvittUserLoginResponseDTO> login(@Valid @RequestBody KvittUserLoginRequestDTO dto) {
         try {
@@ -55,6 +56,26 @@ public class KvittUserController {
                     .body(new KvittUserLoginResponseDTO(dto.username(), null));
 
         } catch (Exception e) {
+            throw e;
+        }
+    }
+    */
+
+    @PostMapping("/login")
+    public ResponseEntity<KvittUserLoginResponseDTO> login(@Valid @RequestBody KvittUserLoginRequestDTO dto) {
+        try {
+            // Generera token precis som förut
+            String token = kvittUserService.login(dto);
+
+            // Vi skippar ResponseCookie helt!
+
+            System.out.println("✅ Token generated and sent in response body");
+
+            // Skicka tillbaka token i bodyn istället för som en kaka
+            return ResponseEntity.ok(new KvittUserLoginResponseDTO(dto.username(), token));
+
+        } catch (Exception e) {
+            System.err.println("❌ Login failed: " + e.getMessage());
             throw e;
         }
     }
